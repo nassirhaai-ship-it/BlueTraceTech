@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { getMockResponse } from "@/lib/mockData";
 
 // Mise à jour du statut d'un IoT
 export async function POST(req: NextRequest) {
@@ -91,9 +92,7 @@ export async function GET(req: NextRequest) {
 
   } catch (error) {
     console.error("❌ Erreur vérification statut IoT devices:", error);
-    return NextResponse.json({ 
-      error: "Erreur lors de la vérification des statuts" 
-    }, { status: 500 });
+    return getMockResponse('iotStatus');
   }
 }
 

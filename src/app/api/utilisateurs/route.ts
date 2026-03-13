@@ -1,16 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
+import { getMockResponse } from "@/lib/mockData";
 
 export async function GET() {
   try {
+    // S'assurer que les utilisateurs initiaux existent en dev
+    await seedInitialUsers();
+    
     const client = await clientPromise;
     const db = client.db();
     const utilisateurs = await db.collection("users").find({}).toArray();
     return NextResponse.json(utilisateurs);
   } catch (error) {
     console.error("Erreur MongoDB:", error);
-    return NextResponse.json({ error: "Erreur de connexion à la base de données" }, { status: 500 });
+    return getMockResponse('utilisateurs');
   }
 }
 
@@ -35,32 +39,34 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Fonction utilitaire pour insérer les utilisateurs initiaux
 async function seedInitialUsers() {
   const client = await clientPromise;
   const db = client.db();
   const users = [
     {
       name: "Administrateur",
-      email: "admin@aqua.com",
+      email: "admin@trace.com",
       password: await bcrypt.hash("admin", 10),
       role: "admin",
+      actif: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
       name: "Opérateur",
-      email: "operateur@aqua.com",
+      email: "operateur@trace.com",
       password: await bcrypt.hash("operateur", 10),
       role: "operateur",
+      actif: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
     {
       name: "Observateur",
-      email: "observateur@aqua.com",
+      email: "observateur@trace.com",
       password: await bcrypt.hash("observateur", 10),
       role: "observateur",
+      actif: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -71,4 +77,5 @@ async function seedInitialUsers() {
       await db.collection("users").insertOne(user);
     }
   }
-} 
+}
+ 

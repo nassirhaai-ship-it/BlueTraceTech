@@ -4,14 +4,14 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { 
-  LayoutDashboard, 
-  History, 
-  Bell, 
-  Users, 
-  Settings, 
-  BarChart3, 
-  Fish, 
+import {
+  LayoutDashboard,
+  History,
+  Bell,
+  Users,
+  Settings,
+  BarChart3,
+  Fish,
   LogOut,
   Menu,
   X,
@@ -103,10 +103,10 @@ export default function Sidebar() {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'operateur': return 'bg-blue-100 text-blue-800';
-      case 'observateur': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+      case 'operateur': return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+      case 'observateur': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      default: return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
     }
   };
 
@@ -126,16 +126,16 @@ export default function Sidebar() {
         <button
           aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          className="p-2 bg-sidebar rounded-lg shadow-md border border-sidebar-border hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={20} className="text-foreground" /> : <Menu size={20} className="text-foreground" />}
         </button>
       </div>
 
       {/* Overlay mobile */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
           aria-label="Fermer le menu"
         />
@@ -144,8 +144,8 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900
-          border-r border-slate-700 transition-all duration-300 z-50
+          fixed top-0 left-0 h-full bg-sidebar
+          border-r border-sidebar-border transition-all duration-300 z-50
           ${isCollapsed ? 'w-16' : 'w-64'}
           flex flex-col justify-between
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -154,20 +154,21 @@ export default function Sidebar() {
         tabIndex={-1}
         aria-label="Navigation principale"
       >
-        {/* Logo */}
-        <div className={`flex items-center h-16 border-b border-slate-700 ${isCollapsed ? 'px-2 justify-center' : 'px-4 justify-between'}`}>
-          {!isCollapsed && (
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg flex items-center justify-center">
-                <Fish size={20} className="text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">AquaAI</span>
+        {/* Logo Section */}
+        <div className={`flex items-center h-20 border-b border-border ${isCollapsed ? 'px-2 justify-center' : 'px-4 justify-between'}`}>
+          {!isCollapsed ? (
+            <div className="flex items-center gap-1 transition-transform duration-300 hover:scale-105">
+              <span className="text-lg font-black tracking-tight uppercase">
+                <span className="text-blue-500">Blue</span><span className="text-foreground">Trace Tech</span>
+              </span>
             </div>
+          ) : (
+             <div className="text-lg font-black text-blue-500">B<span className="text-foreground">T</span></div>
           )}
           {/* Bouton toggle collapse - Desktop uniquement */}
           <button
             onClick={toggleSidebar}
-            className="hidden lg:flex p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+            className="hidden lg:flex p-1.5 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
             title={isCollapsed ? "Agrandir le menu" : "Réduire le menu"}
             aria-label={isCollapsed ? "Agrandir le menu" : "Réduire le menu"}
           >
@@ -176,82 +177,78 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 py-4 space-y-1 overflow-y-auto ${isCollapsed ? 'px-2' : 'px-2'}`}>
+        <nav className={`flex-1 py-6 space-y-1 overflow-y-auto no-scrollbar ${isCollapsed ? 'px-2' : 'px-3'}`}>
           {navigation
             .filter((item) => item.roles.includes(userRole))
             .map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setMobileOpen(false)} // Fermer le menu mobile après clic
-                className={`
-                    group relative flex items-center ${isCollapsed ? 'px-2' : 'px-3'} py-2 text-sm font-medium rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg' 
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                  }
-                    ${isCollapsed ? 'justify-center' : ''}
-                `}
-              >
-                <item.icon 
-                    size={18} 
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)} // Fermer le menu mobile après clic
                   className={`
-                    flex-shrink-0 transition-colors
-                    ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}
-                  `} 
-                />
-                {!isCollapsed && (
-                  <div className="ml-3 flex-1">
-                    <span>{item.name}</span>
-                    <p className="text-xs text-slate-400 mt-0.5">{item.description}</p>
-                  </div>
-                )}
-                {isCollapsed && (
-                    <div className="absolute left-full ml-2 bg-slate-800 text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
-                    {item.name}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
+                    group relative flex items-center ${isCollapsed ? 'px-0 justify-center h-12 w-12 mx-auto' : 'px-4 py-3'} text-sm font-medium rounded-xl transition-all duration-300
+                  ${isActive
+                      ? 'bg-gradient-to-r from-primary/20 to-blue-600/20 text-primary border border-primary/20 shadow-[0_0_20px_rgba(6,182,212,0.1)]'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    }
+                `}
+                >
+                  <item.icon
+                    size={isActive ? 22 : 20}
+                    className={`
+                    flex-shrink-0 transition-all duration-300
+                    ${isActive ? 'text-cyan-400 scale-110' : 'text-slate-500 group-hover:text-cyan-400'}
+                  `}
+                  />
+                  {!isCollapsed && (
+                    <div className="ml-4 flex-1">
+                      <span className={`block transition-colors ${isActive ? 'text-primary' : 'text-foreground group-hover:text-primary'}`}>{item.name}</span>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-widest font-bold font-mono">{item.description}</p>
+                    </div>
+                  )}
+                  {isCollapsed && (
+                    <div className="absolute left-full ml-4 bg-popover text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-2xl">
+                      {item.name}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
         </nav>
 
-        {/* User Profile collé en bas */}
+        {/* User Profile Footer */}
         {session?.user && (
-          <div className={`absolute bottom-0 left-0 w-full border-t border-slate-700 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div className={`mt-auto border-t border-border bg-muted/30 ${isCollapsed ? 'p-2' : 'p-4'}`}>
+            <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
               {!isCollapsed && (
                 <>
-              <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold text-sm">
-                  {session.user.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
-                    {session.user.name}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">
-                    {session.user.email}
-                  </p>
-                  <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full mt-1 ${getRoleColor(session.user.role || '')}`}>
-                    {getRoleLabel(session.user.role || '')}
-                  </span>
-                </div>
+                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-900/40">
+                    <span className="text-white font-black text-sm">
+                      {session.user.name?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-foreground truncate uppercase tracking-tight">
+                      {session.user.name}
+                    </p>
+                    <span className={`inline-block px-2 py-0.5 text-[9px] font-black rounded border uppercase tracking-widest mt-1 ${getRoleColor(session.user.role || '')}`}>
+                      {getRoleLabel(session.user.role || '')}
+                    </span>
+                  </div>
                 </>
               )}
               <button
                 onClick={() => {
                   setLoggingOut(true);
-                  setTimeout(() => signOut({ callbackUrl: '/' }), 1500);
+                  setTimeout(() => signOut({ callbackUrl: '/' }), 1000);
                 }}
-                className={`p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
-                title="Se déconnecter"
+                className={`p-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all ${isCollapsed ? 'mx-auto' : ''}`}
+                title="Déconnexion"
               >
                 {loggingOut ? (
-                  <LoaderIcon size={18} />
+                    <LoaderIcon size={18} />
                 ) : (
                   <LogOut size={18} />
                 )}
@@ -259,22 +256,7 @@ export default function Sidebar() {
             </div>
           </div>
         )}
-
-        {/* System Status */}
-        {!isCollapsed && (
-          <div className="px-4 pb-4">
-            <div className="bg-slate-800 rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Statut système</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-green-400">En ligne</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </aside>
     </>
   );
-} 
+}

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, FileText, Calendar, BarChart3, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
+import { Download, FileText, Calendar, BarChart3, TrendingUp, AlertCircle, CheckCircle, Activity, LayoutDashboard } from "lucide-react";
 import useSWR from "swr";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -34,21 +37,16 @@ export default function RapportsPage() {
   const [rapports] = useState(mockRapports);
   const [page, setPage] = useState(1);
   
-  // Fetch real data
   const { data: mesures, isLoading: mesuresLoading } = useSWR("/api/mesures", fetcher);
   const { data: alertes, isLoading: alertesLoading } = useSWR("/api/alertes", fetcher);
-  const { data: bassins, isLoading: bassinsLoading } = useSWR("/api/bassins", fetcher);
 
-  // Pagination
   const itemsPerPage = 9;
   const totalPages = Math.ceil(rapports.length / itemsPerPage);
   const paginatedRapports = rapports.slice((page - 1) * itemsPerPage, page * itemsPerPage);
   
-  // Calculate real statistics
   const mesuresArray = Array.isArray(mesures?.mesures) ? mesures.mesures : (Array.isArray(mesures) ? mesures : []);
   const alertesArray = Array.isArray(alertes) ? alertes : [];
   
-  // Calculate temperature average
   const temperatureAvg = (() => {
     const tempMesures = mesuresArray.filter((m: any) => m.temperature !== undefined && m.temperature !== null);
     if (tempMesures.length === 0) return 0;
@@ -56,318 +54,260 @@ export default function RapportsPage() {
     return (sum / tempMesures.length).toFixed(1);
   })();
   
-  // Calculate critical alerts (danger type)
   const criticalAlerts = alertesArray.filter((a: any) => a.type === "danger" || a.type === "error").length;
-  
-  // Calculate total measures
-  const totalMesures = mesuresArray.length;
-  
-  // Calculate pH average
-  const phAvg = (() => {
-    const phMesures = mesuresArray.filter((m: any) => m.ph !== undefined && m.ph !== null);
-    if (phMesures.length === 0) return 0;
-    const sum = phMesures.reduce((acc: number, m: any) => acc + parseFloat(m.ph || "0"), 0);
-    return (sum / phMesures.length).toFixed(1);
-  })();
 
-  // Helper function to get date range based on report type
-  function getDateRange(reportType: string) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    switch (reportType) {
-      case "Rapport quotidien":
-        return { startDate: today, endDate: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1) };
-      case "Rapport hebdomadaire":
-        const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        return { startDate: weekStart, endDate: now };
-      case "Rapport mensuel":
-        const monthStart = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-        return { startDate: monthStart, endDate: now };
-      default:
-        return { startDate: today, endDate: now };
-    }
-  }
-  
-  // Filter data based on report type
-  function getFilteredData(reportType: string) {
-    const { startDate, endDate } = getDateRange(reportType);
-    
-    const filteredMesures = mesuresArray.filter((m: any) => {
-      const mesureDate = new Date(m.date);
-      return mesureDate >= startDate && mesureDate <= endDate;
-    });
-    
-    const filteredAlertes = alertesArray.filter((a: any) => {
-      const alerteDate = new Date(a.date);
-      return alerteDate >= startDate && alerteDate <= endDate;
-    });
-    
-    return { filteredMesures, filteredAlertes };
-  }
+  const exportExcel = (type: string) => {
+    try {
+      const wb = XLSX.utils.book_new();
+      
+      // Mesures
+      const mesuresData = mesuresArray.map((m: any) => ({
+        Date: new Date(m.date || Date.now()).toLocaleString('fr-FR'),
+        Bassin: m.bassinId || m.bassin || "N/A",
+        Temperature: m.temperature || "-",
+        pH: m.ph || "-",
+        Oxygene: m.oxygen || "-",
+        Salinite: m.salinity || "-",
+        Turbidite: m.turbidity || "-"
+      }));
+      const wsMesures = XLSX.utils.json_to_sheet(mesuresData);
+      XLSX.utils.book_append_sheet(wb, wsMesures, "Mesures");
 
-  // Export Excel
-  async function handleExportExcel(rapport: any) {
-    const XLSX = await import("xlsx");
-    const { filteredMesures, filteredAlertes } = getFilteredData(rapport.type);
-    
-    // Prepare data for Excel
-    const data: any[] = [];
-    
-    // Add summary section
-    data.push({ Section: "Résumé", Champ: "", Valeur: "" });
-    data.push({ Section: "", Champ: "Période", Valeur: `${rapport.date.toLocaleDateString('fr-FR')}` });
-    data.push({ Section: "", Champ: "Mesures totales", Valeur: filteredMesures.length });
-    data.push({ Section: "", Champ: "Alertes totales", Valeur: filteredAlertes.length });
-    data.push({ Section: "", Champ: "", Valeur: "" });
-    
-    // Add measures section
-    data.push({ Section: "Mesures", Champ: "", Valeur: "" });
-    if (filteredMesures.length > 0) {
-      filteredMesures.slice(0, 50).forEach((m: any) => {
-        data.push({
-          Section: "",
-          Champ: new Date(m.date).toLocaleString('fr-FR'),
-          Valeur: `${m.temperature ? m.temperature + '°C' : ''}${m.ph ? ', pH: ' + m.ph : ''}${m.oxygen ? ', O2: ' + m.oxygen : ''}${m.salinity ? ', Sal: ' + m.salinity : ''}${m.turbidity ? ', Turb: ' + m.turbidity : ''}`,
-          Bassin: m.bassinNom || m.bassin || 'N/A'
-        });
-      });
+      // Alertes
+      const alertesData = alertesArray.map((a: any) => ({
+        Date: new Date(a.date || Date.now()).toLocaleString('fr-FR'),
+        Bassin: a.bassinId || a.bassin || "N/A",
+        Type: a.type,
+        Message: a.message,
+        Statut: a.statut || "non lu"
+      }));
+      const wsAlertes = XLSX.utils.json_to_sheet(alertesData);
+      XLSX.utils.book_append_sheet(wb, wsAlertes, "Alertes");
+
+      XLSX.writeFile(wb, `${type.replace(/\\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (error) {
+      console.error("Erreur lors de l'export Excel:", error);
     }
-    data.push({ Section: "", Champ: "", Valeur: "" });
-    
-    // Add alerts section
-    data.push({ Section: "Alertes", Champ: "", Valeur: "" });
-    if (filteredAlertes.length > 0) {
-      filteredAlertes.forEach((a: any) => {
-        data.push({
-          Section: "",
-          Champ: new Date(a.date).toLocaleString('fr-FR'),
-          Valeur: a.message || a.value,
-          Type: a.type || 'info',
-          Bassin: a.bassin || 'N/A'
-        });
-      });
-    }
-    
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rapport");
-    XLSX.writeFile(wb, `${rapport.type.replace(/ /g, "_")}.xlsx`);
-  }
-  
-  // Export PDF
-  async function handleExportPDF(rapport: any) {
-    const jsPDF = (await import("jspdf")).default;
-    const autoTable = (await import("jspdf-autotable")).default;
-    const doc = new jsPDF();
-    let yPosition = 20;
-    
-    // Title
-    doc.setFontSize(18);
-    doc.text(rapport.type, 14, yPosition);
-    yPosition += 10;
-    
-    // Date and description
-    doc.setFontSize(12);
-    doc.text(`Date: ${rapport.date.toLocaleDateString('fr-FR')}`, 14, yPosition);
-    yPosition += 5;
-    doc.text(`Description: ${rapport.description}`, 14, yPosition);
-    yPosition += 10;
-    
-    // Get filtered data
-    const { filteredMesures, filteredAlertes } = getFilteredData(rapport.type);
-    
-    // Summary section
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Résumé", 14, yPosition);
-    yPosition += 8;
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Mesures totales: ${filteredMesures.length}`, 14, yPosition);
-    yPosition += 5;
-    doc.text(`Alertes totales: ${filteredAlertes.length}`, 14, yPosition);
-    yPosition += 10;
-    
-    // Recent measures table
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Mesures récentes", 14, yPosition);
-    yPosition += 8;
-    
-    if (filteredMesures.length > 0) {
-      const mesuresData = filteredMesures.slice(0, 15).map((m: any) => [
-        new Date(m.date).toLocaleDateString('fr-FR'),
-        m.temperature ? `${m.temperature}°C` : '-',
-        m.ph ? m.ph.toString() : '-',
-        m.oxygen ? `${m.oxygen} mg/L` : '-',
-        m.bassinNom || m.bassin || 'N/A'
-      ]);
+  };
+
+  const exportPDF = (type: string) => {
+    try {
+      const doc = new jsPDF();
       
-    autoTable(doc, {
-        startY: yPosition,
-        head: [["Date", "Température", "pH", "Oxygène", "Bassin"]],
-        body: mesuresData,
-      theme: 'grid',
-        headStyles: { fillColor: [6, 182, 212] },
-        styles: { fontSize: 9 },
-      margin: { left: 14, right: 14 }
-    });
-      yPosition = ((doc as any).lastAutoTable?.finalY || yPosition) + 10;
-    } else {
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text("Aucune mesure disponible", 14, yPosition);
-      yPosition += 10;
-    }
-    
-    // Alerts table
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("Alertes", 14, yPosition);
-    yPosition += 8;
-    
-    if (filteredAlertes.length > 0) {
-      const alertesData = filteredAlertes.slice(0, 15).map((a: any) => [
-        new Date(a.date).toLocaleDateString('fr-FR'),
-        a.message || a.value || '-',
-        a.type || 'info',
-        a.bassin || 'N/A'
-      ]);
+      doc.setFontSize(22);
+      doc.setTextColor(14, 116, 144);
+      doc.text("BlueTrace Tech", 14, 20);
       
-    autoTable(doc, {
-        startY: yPosition,
-        head: [["Date", "Message", "Type", "Bassin"]],
-        body: alertesData,
-      theme: 'grid',
-      headStyles: { fillColor: [6, 182, 212] },
-        styles: { fontSize: 9 },
-      margin: { left: 14, right: 14 }
-    });
-    } else {
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text(type.toUpperCase(), 14, 30);
+      
       doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.text("Aucune alerte disponible", 14, yPosition);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Date de génération: ${new Date().toLocaleString('fr-FR')}`, 14, 38);
+      
+      let yPos = 50;
+
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Résumé des Indicateurs", 14, yPos);
+      yPos += 10;
+      
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Température moyenne globale: ${temperatureAvg}°C`, 20, yPos);
+      yPos += 8;
+      doc.text(`Alertes critiques recensées: ${criticalAlerts}`, 20, yPos);
+      yPos += 8;
+      doc.text(`Total des relevés enregistrés: ${mesuresArray.length}`, 20, yPos);
+      yPos += 15;
+
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Dernières Mesures", 14, yPos);
+      yPos += 6;
+
+      const tableData = mesuresArray.slice(0, 40).map((m: any) => [
+        new Date(m.date || Date.now()).toLocaleString('fr-FR'),
+        m.bassinId || m.bassin || "-",
+        m.temperature ? `${m.temperature}°C` : "-",
+        m.ph || "-",
+        m.oxygen ? `${m.oxygen} mg/L` : "-"
+      ]);
+
+      (doc as any).autoTable({
+        startY: yPos,
+        head: [['Date', 'Bassin', 'Temp.', 'pH', 'Oxygène']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [14, 116, 144] },
+        styles: { fontSize: 9 },
+        margin: { left: 14, right: 14 }
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+
+      if (alertesArray.length > 0) {
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.setTextColor(15, 23, 42);
+        doc.text("Dernières Alertes", 14, yPos);
+        yPos += 6;
+
+        const alertesTableData = alertesArray.slice(0, 40).map((a: any) => [
+          new Date(a.date || Date.now()).toLocaleString('fr-FR'),
+          a.bassinId || a.bassin || "-",
+          a.type,
+          a.message
+        ]);
+
+        (doc as any).autoTable({
+          startY: yPos,
+          head: [['Date', 'Bassin', 'Type', 'Message']],
+          body: alertesTableData,
+          theme: 'grid',
+          headStyles: { fillColor: [225, 29, 72] },
+          styles: { fontSize: 9 },
+          margin: { left: 14, right: 14 }
+        });
+      }
+
+      doc.save(`${type.replace(/\\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error("Erreur lors de l'export PDF:", error);
     }
-    
-    doc.save(`${rapport.type.replace(/ /g, "_")}.pdf`);
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-2 sm:p-6 md:p-12">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-5 lg:gap-6">
         {/* Header avec titre */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               Rapports & Export
             </h1>
-            <p className="text-gray-600 mt-1">Consultez, téléchargez ou exportez les rapports de la ferme aquacole</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">
+              Archives et statistiques du système BlueTrace
+            </p>
           </div>
         </div>
         
-        {/* Cartes statistiques modernes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-2">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Rapports disponibles</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{rapports.length}</p>
-                <p className="text-sm mt-1 text-green-600">Tous formats</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Rapports</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{rapports.length}</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Total généré</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white">
-                <FileText className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
-          
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Température moyenne</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {mesuresLoading ? "..." : `${temperatureAvg}°C`}
-                </p>
-                <p className="text-sm mt-1 text-green-600">Stable</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Temp. Moyenne</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{temperatureAvg}°C</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Globale</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white">
-                <TrendingUp className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
-          
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Alertes critiques</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {alertesLoading ? "..." : criticalAlerts}
-                </p>
-                <p className="text-sm mt-1 text-red-600">À traiter</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Critiques</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{criticalAlerts}</p>
+                <p className="text-xs sm:text-sm mt-1 text-red-600 truncate">Alertes</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center text-white">
-                <AlertCircle className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
-      </div>
-          
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          </div>
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-            <div>
-                <p className="text-sm font-medium text-gray-600">Performance</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">98.5%</p>
-                <p className="text-sm mt-1 text-green-600">+2.3%</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Performance</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">98.5%</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Uptime</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white">
-                <BarChart3 className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
         </div>
         
-        {/* Rapports */}
+        {/* Reports List */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-cyan-600" /> Rapports disponibles
+          <div className="p-4 sm:p-5 lg:p-6 border-b border-gray-200">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <LayoutDashboard className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" /> Archives de rapports
             </h2>
           </div>
           
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {paginatedRapports.map(r => (
-                <div key={r.id} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-200 hover:shadow-lg transition-all">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="bg-cyan-100 p-2 rounded-full">
-                      <FileText className="w-5 h-5 text-cyan-600" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">{r.type}</div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                        <Calendar className="w-3 h-3" />
-                        {r.date.toLocaleDateString('fr-FR')}
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="min-w-full text-xs sm:text-sm">
+              <thead>
+                <tr className="bg-slate-100">
+                  <th className="p-2 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">Type de Rapport</th>
+                  <th className="p-2 sm:p-3 text-left font-semibold text-gray-700 whitespace-nowrap">Date</th>
+                  <th className="p-2 sm:p-3 text-left font-semibold text-gray-700">Description</th>
+                  <th className="p-2 sm:p-3 text-right font-semibold text-gray-700 whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedRapports.map(r => (
+                  <tr key={r.id} className="border-b hover:bg-gray-50 transition-colors">
+                    <td className="p-2 sm:p-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-cyan-600" />
+                        <span className="font-semibold text-gray-900">{r.type}</span>
                       </div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-xs mb-3">{r.description}</p>
-                  <div className="flex gap-2 mt-3">
-                    <button 
-                      className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      onClick={() => handleExportExcel(r)}
-                    >
-                      <BarChart3 className="w-4 h-4" /> Excel
-                    </button>
-            <button
-                      className="flex-1 flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                      onClick={() => handleExportPDF(r)}
-            >
-                      <Download className="w-4 h-4" /> PDF
-            </button>
-          </div>
-                </div>
-              ))}
-            </div>
+                    </td>
+                    <td className="p-2 sm:p-3 text-gray-600 whitespace-nowrap">{r.date.toLocaleDateString('fr-FR')}</td>
+                    <td className="p-2 sm:p-3 text-gray-600">{r.description}</td>
+                    <td className="p-2 sm:p-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button 
+                          onClick={() => exportExcel(r.type)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                        >
+                          <Download className="w-3 h-3" /> Excel
+                        </button>
+                        <button 
+                          onClick={() => exportPDF(r.type)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-500/10 rounded-lg transition-colors"
+                        >
+                          <FileText className="w-3 h-3" /> PDF
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {paginatedRapports.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center gap-2">
+                        <FileText className="w-12 h-12 text-gray-300" />
+                        <span className="text-gray-500 text-lg font-medium">Aucun rapport disponible</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
           
           {/* Pagination */}
@@ -395,8 +335,7 @@ export default function RapportsPage() {
             </div>
           )}
         </div>
-        
       </div>
     </div>
   );
-} 
+}

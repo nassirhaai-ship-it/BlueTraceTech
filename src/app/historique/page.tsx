@@ -12,8 +12,8 @@ const fetcher = (url: string) => fetch(url).then(res => res.json());
 // Composant réutilisable pour un graphique de paramètre avec données temps réel
 function ParametreChart({ title, data, color, unit, seuil }: { title: string, data: any[], color: string, unit?: string, seuil?: number }) {
   return (
-    <div className="bg-white/80 rounded-lg p-4 shadow">
-      <h2 className="text-lg font-semibold mb-2">{title}</h2>
+    <div className="bg-white rounded-xl shadow-md p-4 sm:p-5 lg:p-6 border border-gray-100">
+      <h2 className="text-lg font-bold text-gray-900 mb-4">{title}</h2>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data} margin={{ left: 10, right: 10, top: 10, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -50,12 +50,12 @@ export default function Historique() {
   const [dateDebut, setDateDebut] = useState("");
   const [dateFin, setDateFin] = useState("");
   const [realtimeMesures, setRealtimeMesures] = useState<any[]>([]);
-  const wsToken = process.env.NEXT_PUBLIC_IOT_WS_TOKEN || 'TON_SECRET_TOKEN';
+  const wsToken = process.env.NEXT_PUBLIC_IOT_WS_TOKEN || '';
   // Utiliser l'URL WebSocket depuis les variables d'environnement ou localhost par défaut
   const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? 
     `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:4001` : 
     'ws://localhost:4001');
-  const wsUrl = `${wsBaseUrl}/?token=${wsToken}`;
+  const wsUrl = `${wsBaseUrl}/?token=${wsToken}&type=web`;
   const wsRef = useRef<WebSocket | null>(null);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -341,20 +341,20 @@ export default function Historique() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-2 sm:p-6 md:p-12">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-5 lg:gap-6">
         {/* Header avec titre et actions */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               Historique
             </h1>
-            <p className="text-gray-600 mt-1">Données historiques et mesures du système</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-1">Données historiques et mesures du système</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <span className="text-xs text-gray-500 block">Dernière mise à jour</span>
-              <span className="text-sm font-medium text-gray-900">{lastUpdate.toLocaleTimeString()}</span>
+              <span className="text-xs text-gray-500 block font-medium">Dernière mise à jour</span>
+              <span className="text-sm font-bold text-gray-900">{lastUpdate.toLocaleTimeString()}</span>
             </div>
             <button 
               className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all"
@@ -369,63 +369,63 @@ export default function Historique() {
         </div>
         
         {/* Résumé rapide */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Période affichée</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{periodeLabel}</p>
-                <p className="text-sm mt-1 text-green-600">Période</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Période affichée</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{periodeLabel}</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Période</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white">
-                <Calendar className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <Calendar className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Mesures</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{nbMesures}</p>
-                <p className="text-sm mt-1 text-green-600">Total mesuré</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Mesures</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{nbMesures}</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Total mesuré</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white">
-                <BarChart3 className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Mesures temps réel</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{realtimeMesures.length}</p>
-                <p className="text-sm mt-1 text-green-600">Temps réel</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Mesures temps réel</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{realtimeMesures.length}</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Temps réel</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white">
-                <Zap className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
-          <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
+          <div className="bg-white shadow-sm p-4 sm:p-5 lg:p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Dernière mise à jour</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{lastUpdate.toLocaleTimeString()}</p>
-                <p className="text-sm mt-1 text-green-600">Active</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Dernière mise à jour</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{lastUpdate.toLocaleTimeString()}</p>
+                <p className="text-xs sm:text-sm mt-1 text-green-600 truncate">Active</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white">
-                <Activity className="w-6 h-6" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white flex-shrink-0 ml-2">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Barre de filtres moderne */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex flex-wrap gap-4">
+        <div className="bg-white rounded-xl shadow-md p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-wrap gap-3 sm:gap-4">
             {/* Période */}
             <div className="w-full sm:w-[160px]">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Période</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Période</label>
             <Select value={periode} onValueChange={setPeriode}>
                 <SelectTrigger className="w-full">
                 <SelectValue />
@@ -444,21 +444,21 @@ export default function Historique() {
             {periode === "personnalise" && (
               <>
                 <div className="w-full sm:w-[160px]">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date début</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Date début</label>
                   <input
                     type="date"
                     value={dateDebut}
                     onChange={(e) => setDateDebut(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                   />
                 </div>
                 <div className="w-full sm:w-[160px]">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Date fin</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Date fin</label>
                   <input
                     type="date"
                     value={dateFin}
                     onChange={(e) => setDateFin(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
                   />
                 </div>
               </>
@@ -466,7 +466,7 @@ export default function Historique() {
             
             {/* Bassin */}
             <div className="w-full sm:w-[160px]">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bassin</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Bassin</label>
             <Select value={bassin} onValueChange={setBassin}>
                 <SelectTrigger className="w-full">
                 <SelectValue />
@@ -482,7 +482,7 @@ export default function Historique() {
             
             {/* Paramètre */}
             <div className="w-full sm:w-[180px]">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Paramètre</label>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Paramètre</label>
             <Select value={parametre} onValueChange={setParametre}>
                 <SelectTrigger className="w-full">
                 <SelectValue />
@@ -501,7 +501,7 @@ export default function Historique() {
             {/* Bouton Réinitialiser */}
             <div className="w-full sm:w-auto flex items-end">
               <button 
-                className="w-full sm:w-auto flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+                className="w-full sm:w-auto flex items-center gap-2 px-4 py-2 h-[42px] bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm"
                 onClick={() => {
                   setPeriode("tout");
                   setBassin("tout");
@@ -528,30 +528,33 @@ export default function Historique() {
 
         {/* Tableau mesures moderne */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <History className="w-6 h-6 text-cyan-600" /> Mesures
+          <div className="p-4 sm:p-5 lg:p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <History className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" /> 
+                <span>Mesures</span>
               </h2>
               <button 
                 onClick={exportCSV}
-                className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-md hover:shadow-lg transition-all"
+                className="flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
               >
-                <Download className="w-4 h-4" /> Export CSV
+                <Download className="w-4 h-4" /> 
+                <span className="hidden sm:inline">Export CSV</span>
+                <span className="sm:hidden">Export</span>
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="min-w-full text-xs sm:text-sm">
             <thead>
               <tr className="bg-slate-100">
-                <th className="p-2 text-left">Date</th>
-                <th className="p-2 text-left">Bassin</th>
-                <th className="p-2 text-left">Temperature</th>
-                <th className="p-2 text-left">pH</th>
-                <th className="p-2 text-left">Oxygen</th>
-                <th className="p-2 text-left">Salinity</th>
-                <th className="p-2 text-left">Turbidity</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap">Date</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden sm:table-cell">Bassin</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap">Temperature</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap">pH</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap">Oxygen</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden md:table-cell">Salinity</th>
+                <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden md:table-cell">Turbidity</th>
               </tr>
             </thead>
             <tbody>
@@ -650,6 +653,7 @@ export default function Historique() {
                     <tr>
                       <td colSpan={7} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center gap-2">
+                          <History className="w-12 h-12 text-gray-300" />
                           <span className="text-gray-500 text-lg font-medium">Aucune mesure trouvée</span>
                           <span className="text-gray-400 text-sm">Essayez de modifier vos filtres</span>
                         </div>
@@ -659,14 +663,14 @@ export default function Historique() {
                 }
                 
                 return tableData.map((row: any, i: number) => (
-                  <tr key={row.key || i} className="border-b">
-                    <td className="p-2">{row.date}</td>
-                    <td className="p-2">{row.bassin}</td>
-                    <td className="p-2">{row.temperature || '-'}</td>
-                    <td className="p-2">{row.ph || '-'}</td>
-                    <td className="p-2">{row.oxygen || '-'}</td>
-                    <td className="p-2">{row.salinity || '-'}</td>
-                    <td className="p-2">{row.turbidity || '-'}</td>
+                  <tr key={row.key || i} className="border-b hover:bg-gray-50">
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">{row.date}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm font-medium text-gray-900 hidden sm:table-cell">{row.bassin}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-cyan-600 font-medium">{row.temperature || '-'}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-orange-500 font-medium">{row.ph || '-'}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-green-600 font-medium">{row.oxygen || '-'}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-purple-600 font-medium hidden md:table-cell">{row.salinity || '-'}</td>
+                    <td className="p-2 sm:p-3 text-xs sm:text-sm text-red-500 font-medium hidden md:table-cell">{row.turbidity || '-'}</td>
                   </tr>
                 ));
               })()}

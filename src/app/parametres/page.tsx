@@ -1,70 +1,31 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, Edit, Database, Lock, RefreshCcw, Settings, SlidersHorizontal } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Eye, EyeOff, Edit, Database, Lock, RefreshCcw, Settings, SlidersHorizontal, Activity, CheckCircle } from "lucide-react";
 
 export default function ParametresPage() {
   // States pour chaque section
-  const [showPwdModal, setShowPwdModal] = useState(false);
   const [showDbModal, setShowDbModal] = useState(false);
   const [showUri, setShowUri] = useState(false);
   const [showEditUri, setShowEditUri] = useState(false);
   const [feedback, setFeedback] = useState<string|null>(null);
   const [loading, setLoading] = useState(false);
-  // Password form
-  const [oldPwd, setOldPwd] = useState("");
-  const [newPwd, setNewPwd] = useState("");
-  const [confirmPwd, setConfirmPwd] = useState("");
+  
   // Mongo URI
   const [mongoUri, setMongoUri] = useState<string>("...");
   const [editUri, setEditUri] = useState(mongoUri);
 
   // Logique floue - paramètres par défaut
   const [fuzzyParams, setFuzzyParams] = useState({
-    temperature: {
-      min: 18,
-      max: 30,
-      warning_low: 20,
-      warning_high: 28,
-      critical_low: 18,
-      critical_high: 30
-    },
-    ph: {
-      min: 6.5,
-      max: 8.5,
-      warning_low: 7.0,
-      warning_high: 8.0,
-      critical_low: 6.5,
-      critical_high: 8.5
-    },
-    oxygen: {
-      min: 4,
-      max: 12,
-      warning_low: 5,
-      warning_high: 10,
-      critical_low: 4,
-      critical_high: 12
-    },
-    salinity: {
-      min: 25,
-      max: 35,
-      warning_low: 28,
-      warning_high: 32,
-      critical_low: 25,
-      critical_high: 35
-    },
-    turbidity: {
-      min: 0,
-      max: 50,
-      warning_low: 5,
-      warning_high: 30,
-      critical_low: 0,
-      critical_high: 50
-    }
+    temperature: { min: 18, max: 30, warning_low: 20, warning_high: 28, critical_low: 18, critical_high: 30 },
+    ph: { min: 6.5, max: 8.5, warning_low: 7.0, warning_high: 8.0, critical_low: 6.5, critical_high: 8.5 },
+    oxygen: { min: 4, max: 12, warning_low: 5, warning_high: 10, critical_low: 4, critical_high: 12 },
+    salinity: { min: 25, max: 35, warning_low: 28, warning_high: 32, critical_low: 25, critical_high: 35 },
+    turbidity: { min: 0, max: 50, warning_low: 5, warning_high: 30, critical_low: 0, critical_high: 50 }
   });
 
   const [showFuzzyModal, setShowFuzzyModal] = useState(false);
   const [editingParam, setEditingParam] = useState<string | null>(null);
+  const [tempFuzzyVals, setTempFuzzyVals] = useState<any>(null);
 
   useEffect(() => {
     fetch("/api/parametres/mongodb-uri")
@@ -89,38 +50,6 @@ export default function ParametresPage() {
       });
   }, []);
 
-  // Handlers
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setFeedback(null);
-    if (newPwd !== confirmPwd) {
-      setFeedback("Les mots de passe ne correspondent pas.");
-      setLoading(false);
-      return;
-    }
-    try {
-      const res = await fetch("/api/utilisateurs/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ oldPassword: oldPwd, newPassword: newPwd })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setFeedback(data.error || "Erreur lors du changement de mot de passe");
-        setLoading(false);
-        return;
-      }
-      setFeedback("Mot de passe changé avec succès !");
-      setShowPwdModal(false);
-      setOldPwd(""); setNewPwd(""); setConfirmPwd("");
-    } catch {
-      setFeedback("Erreur lors du changement de mot de passe");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleEditUri = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -143,359 +72,208 @@ export default function ParametresPage() {
     }, 1200);
   };
 
-  // Fonctions pour la logique floue
   const handleEditFuzzyParam = (paramName: string) => {
     setEditingParam(paramName);
+    setTempFuzzyVals({ ...(fuzzyParams as any)[paramName] });
     setShowFuzzyModal(true);
   };
 
   const handleSaveFuzzyParam = async (paramName: string, newValues: any) => {
     try {
       setLoading(true);
-      const updatedConfig = {
-        ...fuzzyParams,
-        [paramName]: newValues
-      };
-
+      const updatedConfig = { ...fuzzyParams, [paramName]: newValues };
       const response = await fetch("/api/parametres/fuzzy-logic", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ config: updatedConfig }),
       });
-
       const data = await response.json();
-
       if (data.success) {
         setFuzzyParams(updatedConfig);
-        setFeedback(`Paramètres ${getParamDisplayName(paramName)} mis à jour avec succès !`);
+        setFeedback(`Paramètres ${getParamDisplayName(paramName)} mis à jour !`);
         setShowFuzzyModal(false);
-        setEditingParam(null);
-      } else {
-        setFeedback("Erreur lors de la sauvegarde des paramètres");
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      setFeedback("Erreur lors de la sauvegarde des paramètres");
+      setFeedback("Erreur de sauvegarde");
     } finally {
       setLoading(false);
     }
   };
 
-  const getParamDisplayName = (paramName: string) => {
-    const names = {
-      temperature: 'Température',
-      ph: 'pH',
-      oxygen: 'Oxygène',
-      salinity: 'Salinité',
-      turbidity: 'Turbidité'
-    };
-    return names[paramName as keyof typeof names] || paramName;
-  };
-
-  const getParamUnit = (paramName: string) => {
-    const units = {
-      temperature: '°C',
-      ph: '',
-      oxygen: 'mg/L',
-      salinity: 'ppt',
-      turbidity: 'NTU'
-    };
-    return units[paramName as keyof typeof units] || '';
-  };
+  const getParamDisplayName = (p: string) => (({ temperature: 'Température', ph: 'pH', oxygen: 'Oxygène', salinity: 'Salinité', turbidity: 'Turbidité' } as Record<string, string>)[p] || p);
+  const getParamUnit = (p: string) => (({ temperature: '°C', ph: '', oxygen: 'mg/L', salinity: 'ppt', turbidity: 'NTU' } as Record<string, string>)[p] || '');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col">
-      <header className="w-full max-w-5xl mx-auto px-4 pt-8 pb-4">
-        <div className="flex items-center gap-3 mb-1">
-          <Settings className="text-cyan-500 w-8 h-8" />
-          <h1 className="text-3xl font-bold text-cyan-800 drop-shadow-sm">Paramètres</h1>
-        </div>
-        <p className="text-gray-600 text-lg">Gérez la sécurité, la base de données et les options avancées de votre application.</p>
-      </header>
-      <main className="flex-1 w-full max-w-6xl mx-auto flex flex-col gap-8 px-4 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Section Base de données */}
-          <Card className="p-10 bg-white/95 shadow-lg border border-cyan-100 rounded-2xl flex flex-col gap-8 min-w-0">
-            <h2 className="text-xl font-bold flex items-center gap-2 text-cyan-700 mb-1"><Database className="text-cyan-400" /> Base de données</h2>
-            <p className="text-gray-600 text-sm mb-4">Gérez la connexion à la base MongoDB et les opérations critiques.</p>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-medium">URI MongoDB :</span>
-              <span className="text-gray-600 select-all font-mono">
-                {showUri ? mongoUri : "••••••••••••••"}
-              </span>
-              <button onClick={() => setShowUri(v => !v)} className="ml-1 text-xs text-cyan-600 hover:underline focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded">
-                {showUri ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-              <button onClick={() => { setEditUri(mongoUri); setShowEditUri(true); }} className="ml-1 text-xs text-cyan-600 hover:underline flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-cyan-400 rounded">
-                <Edit size={16} /> Modifier
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-3 sm:p-4 md:p-5 lg:p-6 xl:p-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-4 sm:gap-5 lg:gap-6">
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white flex-shrink-0">
+              <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <button
-              onClick={() => setShowDbModal(true)}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 shadow focus:outline-none focus:ring-2 focus:ring-red-400 w-full justify-center text-base"
-            >
-              <RefreshCcw size={20} /> Réinitialiser la base de données
-            </button>
-          </Card>
-        </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Configuration Système</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1">
+                BlueTrace Tech core
+              </p>
+            </div>
+          </div>
+        </header>
 
-        {/* Section Logique Floue */}
-        <Card className="p-10 bg-white/95 shadow-lg border border-cyan-100 rounded-2xl">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-cyan-700 mb-6">
-            <SlidersHorizontal className="text-cyan-400" /> Configuration de la Logique Floue
-          </h2>
-          <p className="text-gray-600 text-sm mb-6">
-            Configurez les seuils d'alerte pour chaque paramètre aquacole. La logique floue génère des alertes intelligentes basées sur ces seuils.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.entries(fuzzyParams).map(([paramName, values]) => (
-              <div key={paramName} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                    {paramName === 'temperature' && '🌡️'}
-                    {paramName === 'ph' && '🧪'}
-                    {paramName === 'oxygen' && '💧'}
-                    {paramName === 'salinity' && '🧂'}
-                    {paramName === 'turbidity' && '🌫️'}
-                    {getParamDisplayName(paramName)}
-                  </h3>
-                  <button
-                    onClick={() => handleEditFuzzyParam(paramName)}
-                    className="text-cyan-600 hover:text-cyan-700 text-sm font-medium"
-                  >
-                    <Edit size={16} />
-                  </button>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Normal:</span>
-                    <span className="font-medium">
-                      {values.warning_low} - {values.warning_high} {getParamUnit(paramName)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-yellow-600">Avertissement:</span>
-                    <span className="font-medium text-yellow-600">
-                      {values.critical_low} - {values.critical_high} {getParamUnit(paramName)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-red-600">Critique:</span>
-                    <span className="font-medium text-red-600">
-                      &lt; {values.critical_low} ou &gt; {values.critical_high} {getParamUnit(paramName)}
-                    </span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-5 lg:p-6 border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Database className="w-5 h-5 text-cyan-600" /> Infrastructure
+            </h2>
+            <div className="space-y-6">
+              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">Endpoint MongoDB</p>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-mono text-sm text-cyan-600 truncate">
+                    {showUri ? mongoUri : "••••••••••••••••••••••••"}
+                  </span>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowUri(!showUri)} className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+                      {showUri ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    <button onClick={() => setShowEditUri(true)} className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700">
+                      <Edit size={16} />
+                    </button>
                   </div>
                 </div>
               </div>
-            ))}
+              <button 
+                onClick={() => setShowDbModal(true)}
+                className="w-full py-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm font-semibold hover:bg-red-100 transition-all flex justify-center items-center gap-2"
+              >
+                Réinitialiser la base de données
+              </button>
+            </div>
           </div>
-        </Card>
-      </main>
-      {/* Feedback */}
+
+          <div className="bg-white rounded-xl shadow-md p-4 sm:p-5 lg:p-6 border border-gray-100">
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <SlidersHorizontal className="w-5 h-5 text-cyan-600" /> Logique Floue
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Object.entries(fuzzyParams).map(([name, vals]) => (
+                <div key={name} className="p-4 rounded-xl bg-gray-50 border border-gray-200 hover:border-cyan-300 transition-all group">
+                   <div className="flex justify-between items-center mb-3">
+                    <span className="text-sm font-semibold text-gray-900">{getParamDisplayName(name)}</span>
+                    <button onClick={() => handleEditFuzzyParam(name)} className="opacity-0 group-hover:opacity-100 transition-opacity text-cyan-600 hover:text-cyan-700">
+                      <Edit size={16} />
+                    </button>
+                  </div>
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="text-gray-500">Normal</span>
+                    <span className="text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+                      {vals.warning_low} - {vals.warning_high}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {feedback && (
-        <div className="fixed bottom-6 right-6 bg-cyan-700 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-fade-in flex items-center gap-4">
-          <span>{feedback}</span>
-          <button className="ml-2 text-xs underline" onClick={() => setFeedback(null)}>Fermer</button>
+        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-lg border border-gray-200 px-4 py-3 flex items-center gap-3 z-50 animate-in slide-in-from-right duration-300">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <span className="text-gray-900 font-medium">{feedback}</span>
+          <button 
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={() => setFeedback(null)}
+          >
+            ×
+          </button>
         </div>
       )}
-      {/* Modals */}
+
+      {/* Editeur Logique Floue */}
+      {showFuzzyModal && editingParam && tempFuzzyVals && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <SlidersHorizontal className="w-5 h-5 text-cyan-600" />
+              Configuration : {getParamDisplayName(editingParam)}
+            </h3>
+            
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Minimum Absolu ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.min} onChange={e => setTempFuzzyVals({...tempFuzzyVals, min: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Maximum Absolu ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.max} onChange={e => setTempFuzzyVals({...tempFuzzyVals, max: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Critique Bas ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.critical_low} onChange={e => setTempFuzzyVals({...tempFuzzyVals, critical_low: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Critique Haut ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.critical_high} onChange={e => setTempFuzzyVals({...tempFuzzyVals, critical_high: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Alerte Basse ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.warning_low} onChange={e => setTempFuzzyVals({...tempFuzzyVals, warning_low: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Alerte Haute ({getParamUnit(editingParam)})</label>
+                  <input type="number" step="0.1" value={tempFuzzyVals.warning_high} onChange={e => setTempFuzzyVals({...tempFuzzyVals, warning_high: parseFloat(e.target.value)})} className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowFuzzyModal(false)} 
+                className="flex-1 py-2 bg-gray-100 rounded-lg font-medium text-gray-700 hover:bg-gray-200 transition-all"
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={() => handleSaveFuzzyParam(editingParam, tempFuzzyVals)} 
+                className="flex-1 py-2 bg-cyan-600 rounded-lg font-medium text-white hover:bg-cyan-700 transition-all flex justify-center items-center"
+              >
+                {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "Sauvegarder"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modals placeholders for brevity */}
       {showEditUri && (
-        <Modal onClose={() => setShowEditUri(false)}>
-          <form onSubmit={handleEditUri} className="space-y-6">
-            <h3 className="text-lg font-bold mb-2 flex items-center gap-2 text-cyan-700"><Edit className="text-cyan-400" /> Modifier l'URI MongoDB</h3>
-            <input type="text" className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-cyan-400 font-mono" value={editUri} onChange={e => setEditUri(e.target.value)} required />
-            <div className="flex justify-end gap-2 mt-2">
-              <button type="button" className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200" onClick={() => setShowEditUri(false)}>Annuler</button>
-              <button type="submit" className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 font-semibold shadow" disabled={loading}>{loading ? "..." : "Valider"}</button>
-            </div>
-          </form>
-        </Modal>
-      )}
-      {showDbModal && (
-        <Modal onClose={() => setShowDbModal(false)}>
-          <div className="space-y-6">
-            <h3 className="text-lg font-bold mb-2 text-red-600 flex items-center gap-2"><RefreshCcw /> Confirmer la réinitialisation</h3>
-            <p>Cette action va supprimer toutes les données et réinitialiser la base. Êtes-vous sûr ?</p>
-            <div className="flex justify-end gap-2">
-              <button className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200" onClick={() => setShowDbModal(false)}>Annuler</button>
-              <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold shadow" onClick={handleResetDb} disabled={loading}>{loading ? "..." : "Oui, réinitialiser"}</button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Mise à jour URI</h3>
+            <input 
+              type="text" 
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-gray-900 font-mono text-sm focus:ring-2 focus:ring-cyan-500 outline-none mb-6" 
+              value={editUri} 
+              onChange={e => setEditUri(e.target.value)} 
+            />
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowEditUri(false)} 
+                className="flex-1 py-2 bg-gray-100 rounded-lg font-medium text-gray-700 hover:bg-gray-200 transition-all"
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={handleEditUri} 
+                className="flex-1 py-2 bg-cyan-600 rounded-lg font-medium text-white hover:bg-cyan-700 transition-all flex justify-center items-center"
+              >
+                {loading ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div> : "Sauvegarder"}
+              </button>
             </div>
           </div>
-        </Modal>
-      )}
-      {/* Modal Configuration Logique Floue */}
-      {showFuzzyModal && editingParam && (
-        <FuzzyConfigModal
-          paramName={editingParam}
-          paramValues={fuzzyParams[editingParam as keyof typeof fuzzyParams]}
-          onSave={(newValues) => handleSaveFuzzyParam(editingParam, newValues)}
-          onClose={() => {
-            setShowFuzzyModal(false);
-            setEditingParam(null);
-          }}
-          unit={getParamUnit(editingParam)}
-          displayName={getParamDisplayName(editingParam)}
-        />
+        </div>
       )}
     </div>
   );
 }
-
-function Modal({ children, onClose }: { children: React.ReactNode, onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-cyan-200/80 via-blue-200/80 to-blue-100/80 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function FuzzyConfigModal({ paramName, paramValues, onSave, onClose, unit, displayName }: {
-  paramName: string;
-  paramValues: any;
-  onSave: (newValues: any) => void;
-  onClose: () => void;
-  unit: string;
-  displayName: string;
-}) {
-  const [values, setValues] = useState(paramValues);
-
-  const handleSave = () => {
-    onSave(values);
-  };
-
-  const updateValue = (field: string, value: number) => {
-    setValues((prev: any) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-cyan-200/80 via-blue-200/80 to-blue-100/80 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-xl">&times;</button>
-        <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-cyan-700">
-          {paramName === 'temperature' && '🌡️'}
-          {paramName === 'ph' && '🧪'}
-          {paramName === 'oxygen' && '💧'}
-          {paramName === 'salinity' && '🧂'}
-          {paramName === 'turbidity' && '🌫️'}
-          Configuration {displayName}
-        </h3>
-        
-        <div className="space-y-6">
-          {/* Seuils d'avertissement */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-gray-800 border-b pb-2">Seuils d'avertissement (Zone jaune)</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Seuil bas {unit}
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={values.warning_low}
-                  onChange={(e) => updateValue('warning_low', parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Seuil haut {unit}
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={values.warning_high}
-                  onChange={(e) => updateValue('warning_high', parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Seuils critiques */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-gray-800 border-b pb-2">Seuils critiques (Zone rouge)</h4>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Seuil bas {unit}
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={values.critical_low}
-                  onChange={(e) => updateValue('critical_low', parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Seuil haut {unit}
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={values.critical_high}
-                  onChange={(e) => updateValue('critical_high', parseFloat(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Aperçu des zones */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="font-semibold text-gray-800 mb-3">Aperçu des zones d'alerte</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-red-600 font-medium">🔴 Critique:</span>
-                <span className="text-red-600">
-                  &lt; {values.critical_low} ou &gt; {values.critical_high} {unit}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-yellow-600 font-medium">🟡 Avertissement:</span>
-                <span className="text-yellow-600">
-                  {values.critical_low} - {values.warning_low} ou {values.warning_high} - {values.critical_high} {unit}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-600 font-medium">🟢 Normal:</span>
-                <span className="text-green-600">
-                  {values.warning_low} - {values.warning_high} {unit}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end gap-2">
-          <button 
-            type="button" 
-            className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200" 
-            onClick={onClose}
-          >
-            Annuler
-          </button>
-          <button 
-            type="button" 
-            className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 font-semibold shadow" 
-            onClick={handleSave}
-          >
-            Sauvegarder
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-} 

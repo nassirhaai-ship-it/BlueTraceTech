@@ -2,23 +2,26 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { 
-  ArrowLeft, 
-  Fish, 
-  Thermometer, 
-  Activity, 
-  Droplets, 
-  Waves, 
-  Scale, 
-  Ruler, 
-  Calendar, 
+import {
+  ArrowLeft,
+  Fish,
+  Thermometer,
+  Activity,
+  Droplets,
+  Waves,
+  Scale,
+  Ruler,
+  Calendar,
   Info,
   Award,
   CheckCircle2,
   LineChart,
   Download,
   Clipboard,
-  Share2
+  Share2,
+  ShieldCheck,
+  QrCode,
+  MapPin
 } from "lucide-react";
 import Link from "next/link";
 import { Line } from "react-chartjs-2";
@@ -34,17 +37,7 @@ import {
   Filler
 } from 'chart.js';
 
-// Enregistrer les composants ChartJS
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 interface Mesure {
   _id: string;
@@ -88,935 +81,202 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [mesuresHistoriques, setMesuresHistoriques] = useState<Mesure[]>([]);
-  const [loadingMesures, setLoadingMesures] = useState(false);
   const certificateRef = useRef<HTMLDivElement>(null);
   const lotId = params.id;
-  
+
   useEffect(() => {
     const fetchLotData = async () => {
       try {
-        // Utiliser la nouvelle API publique
         const response = await fetch(`/api/lots/public/${lotId}`);
-        
-        if (!response.ok) {
-          if (response.status === 404) {
-            throw new Error("Lot non trouvé");
-          }
-          throw new Error("Erreur lors du chargement des données");
-        }
-        
+        if (!response.ok) throw new Error("Lot non trouvé");
         const data = await response.json();
         setLot(data);
         setLoading(false);
-        
-        // Si le lot a un bassin mais pas de mesures, charger les mesures séparément
-        if (data.bassinId && (!data.mesures || data.mesures.length === 0)) {
-          fetchMesuresHistoriques(data.bassinId);
-        }
       } catch (err: any) {
-        setError(err.message || "Une erreur est survenue");
+        setError(err.message || "Erreur serveur");
         setLoading(false);
       }
     };
-    
     fetchLotData();
   }, [lotId]);
-  
-  // Charger l'historique des mesures pour un bassin
-  const fetchMesuresHistoriques = async (bassinId: string) => {
-    try {
-      setLoadingMesures(true);
-      const response = await fetch(`/api/historique/bassin/${bassinId}`);
-      
-      if (!response.ok) {
-        throw new Error("Erreur lors du chargement des mesures");
-      }
-      
-      const data = await response.json();
-      
-      if (data.mesures && data.mesures.length > 0) {
-        setMesuresHistoriques(data.mesures);
-        
-        // Mettre à jour le lot avec les nouvelles mesures et statistiques
-        setLot(prevLot => {
-          if (!prevLot) return null;
-          
-          return {
-            ...prevLot,
-            mesures: data.mesures,
-            statistiques: {
-              temperature: {
-                min: data.statistics.temperature.min,
-                max: data.statistics.temperature.max,
-                moyenne: data.statistics.temperature.avg
-              },
-              ph: {
-                min: data.statistics.ph.min,
-                max: data.statistics.ph.max,
-                moyenne: data.statistics.ph.avg
-              },
-              oxygen: {
-                min: data.statistics.oxygen.min,
-                max: data.statistics.oxygen.max,
-                moyenne: data.statistics.oxygen.avg
-              },
-              salinity: {
-                min: data.statistics.salinity.min,
-                max: data.statistics.salinity.max,
-                moyenne: data.statistics.salinity.avg
-              },
-              turbidity: {
-                min: data.statistics.turbidity.min,
-                max: data.statistics.turbidity.max,
-                moyenne: data.statistics.turbidity.avg
-              }
-            }
-          };
-        });
-      }
-      
-      setLoadingMesures(false);
-    } catch (err) {
-      console.error("Erreur lors du chargement des mesures:", err);
-      setLoadingMesures(false);
-    }
-  };
-  
-  // Formater les dates
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return "Non spécifiée";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-  
-  // Traduire le stade de développement
-  const traduireStade = (stade: string) => {
-    const traductions: { [key: string]: string } = {
-      alevin: "Alevin",
-      juvenile: "Juvénile",
-      adulte: "Adulte",
-      reproducteur: "Reproducteur"
-    };
-    
-    return traductions[stade] || stade;
-  };
 
-  // Copier le lien dans le presse-papier
-  const copierLien = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setToastMessage("Lien copié dans le presse-papier");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+  const formatDate = (d: string | undefined) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "---";
 
-  // Télécharger le certificat (fonction simulée)
-  const telechargerCertificat = () => {
-    setToastMessage("Certificat en cours de téléchargement...");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-
-  // Préparer les données pour les graphiques
-  const preparerDonneesGraphique = (mesures: Mesure[] | undefined, metrique: string) => {
-    if (!mesures || mesures.length === 0) return null;
-
-    // Formater les données
-    const labels = mesures.map(m => {
-      const date = new Date(m.timestamp);
-      return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    }).reverse();
-
-    const donnees = mesures.map(m => m[metrique as keyof Mesure] as number).reverse();
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: metrique.charAt(0).toUpperCase() + metrique.slice(1),
-          data: donnees,
-          borderColor: getColorForMetric(metrique),
-          backgroundColor: `${getColorForMetric(metrique)}20`,
-          tension: 0.4,
-          fill: true,
-          pointRadius: 2,
-        }
-      ]
-    };
-  };
-
-  // Déterminer la couleur pour chaque métrique
-  const getColorForMetric = (metrique: string) => {
-    switch (metrique) {
-      case 'temperature': return '#ef4444'; // rouge
-      case 'ph': return '#8b5cf6'; // violet
-      case 'oxygen': return '#3b82f6'; // bleu
-      case 'salinity': return '#06b6d4'; // cyan
-      case 'turbidity': return '#84cc16'; // vert clair
-      default: return '#3b82f6'; // bleu par défaut
-    }
-  };
-
-  // Options communes pour les graphiques
   const chartOptions = {
     responsive: true,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-      },
-    },
+    plugins: { legend: { display: false } },
     scales: {
-      y: {
-        beginAtZero: false,
-        grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-    },
-    interaction: {
-      mode: 'nearest' as const,
-      axis: 'x' as const,
-      intersect: false,
-    },
-    elements: {
-      line: {
-        borderWidth: 2,
-      },
-    },
+      y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.3)' } },
+      x: { grid: { display: false }, ticks: { color: 'rgba(255, 255, 255, 0.3)' } }
+    }
   };
 
-  // Déterminer si nous avons des données de mesures à afficher
-  const hasMesures = (lot?.mesures && lot.mesures.length > 0) || mesuresHistoriques.length > 0;
+  const getChartData = (mesures: Mesure[] | undefined, metrique: string, color: string) => {
+    if (!mesures || mesures.length === 0) return null;
+    return {
+      labels: mesures.map(m => new Date(m.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })).reverse(),
+      datasets: [{
+        label: metrique,
+        data: mesures.map(m => m[metrique as keyof Mesure] as number).reverse(),
+        borderColor: color,
+        backgroundColor: `${color}20`,
+        tension: 0.4,
+        fill: true,
+        pointRadius: 0,
+      }]
+    };
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-16 w-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-6 text-gray-600 text-lg">Chargement des informations de traçabilité...</p>
-          <p className="mt-2 text-gray-500 text-sm">Veuillez patienter</p>
-        </div>
+  if (loading) return <div className="min-h-screen bg-[#020617] flex items-center justify-center font-black text-cyan-400 uppercase tracking-widest animate-pulse">Chargement Traçabilité...</div>;
+
+  if (error || !lot) return (
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center">
+      <div className="max-w-md">
+        <div className="text-rose-500 mb-6 flex justify-center"><ShieldCheck size={64} /></div>
+        <h1 className="text-2xl font-black text-white uppercase tracking-tight mb-4">{error || "Lot introuvable"}</h1>
+        <Link href="/" className="inline-block px-8 py-4 bg-white/5 border border-white/10 rounded-2xl text-slate-300 font-bold hover:bg-white/10 transition-all uppercase tracking-widest text-xs">Retour Accueil</Link>
       </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
-          <div className="inline-flex h-20 w-20 rounded-full bg-red-50 items-center justify-center mb-4">
-            <div className="text-red-500 text-3xl">⚠️</div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Erreur</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <Link 
-            href="/"
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition inline-flex items-center gap-2"
-          >
-            <ArrowLeft size={16} /> Retour à l'accueil
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!lot) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
-          <div className="inline-flex h-20 w-20 rounded-full bg-amber-50 items-center justify-center mb-4">
-            <div className="text-amber-500 text-3xl">🔍</div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Lot introuvable</h1>
-          <p className="text-gray-600 mb-6">Les informations de ce lot ne sont pas disponibles.</p>
-          <Link 
-            href="/"
-            className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition inline-flex items-center gap-2"
-          >
-            <ArrowLeft size={16} /> Retour à l'accueil
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Toast de notification */}
-      {showToast && (
-        <div className="fixed top-6 right-6 z-50 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in-down">
-          <CheckCircle2 size={18} />
-          <p>{toastMessage}</p>
-        </div>
-      )}
-      
-      {/* En-tête */}
-      <header className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white py-8 px-4 md:px-8 shadow-lg">
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans selection:bg-cyan-500/30">
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-cyan-900/20 to-transparent pointer-events-none"></div>
+
+      <header className="relative pt-16 pb-32 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-              <Fish size={28} className="text-white" />
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-cyan-400 backdrop-blur-xl">
+                  <ShieldCheck size={28} />
+                </div>
+                <h1 className="text-sm font-black text-cyan-500 uppercase tracking-[0.3em]">Certificat d'Authenticité Digital</h1>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none">
+                BlueTrace <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600">Verified.</span>
+              </h2>
             </div>
-            <h1 className="text-3xl font-bold">Certificat de Traçabilité AquaAI</h1>
+            <div className="flex gap-4">
+              <button onClick={() => window.print()} className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+                <Download size={16} /> Imprimer
+              </button>
+            </div>
           </div>
-          <p className="text-blue-100 text-lg max-w-2xl">
-            Ce certificat garantit l'authenticité et la traçabilité complète des informations sur ce lot de poissons.
-          </p>
         </div>
       </header>
-      
-      {/* Actions simplifiées */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-end h-14">
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={copierLien}
-                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition flex items-center gap-1"
-                title="Copier le lien"
-              >
-                <Clipboard size={18} />
-                <span className="hidden sm:inline">Copier le lien</span>
-              </button>
-              <button 
-                onClick={() => window.print()}
-                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition flex items-center gap-1"
-                title="Imprimer"
-              >
-                <Download size={18} />
-                <span className="hidden sm:inline">Imprimer</span>
-              </button>
-              <button 
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: `Traçabilité du lot ${lot.nom}`,
-                      text: `Informations de traçabilité pour le lot ${lot.nom} (${lot.espece})`,
-                      url: window.location.href,
-                    });
-                  } else {
-                    copierLien();
-                  }
-                }}
-                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition flex items-center gap-1"
-                title="Partager"
-              >
-                <Share2 size={18} />
-                <span className="hidden sm:inline">Partager</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Contenu principal sans onglets */}
-      <main className="max-w-6xl mx-auto px-4 md:px-8 py-8">
-        {/* Titre du lot */}
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-4 mb-2">
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-4 rounded-xl shadow-md">
-              <Fish size={32} />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-800">{lot.nom}</h2>
-              <p className="text-xl text-gray-600">Espèce: <span className="font-medium">{lot.espece}</span></p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3 mt-4">
-            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1">
-              <Calendar size={14} /> Créé le {formatDate(lot.dateCreation)}
-            </span>
-            <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1">
-              <Activity size={14} /> Stade: {traduireStade(lot.stade)}
-            </span>
-            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center gap-1">
-              <CheckCircle2 size={14} /> Certifié AquaAI
-            </span>
-          </div>
-        </div>
 
-        {/* Grille d'informations */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Info className="text-blue-500" size={20} />
-                Informations générales
-              </h3>
-            </div>
-            
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                    <Scale size={20} />
+      <main className="max-w-6xl mx-auto px-6 -mt-16 pb-32 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="premium-card !p-8">
+              <div className="flex flex-wrap justify-between items-start gap-4 mb-10">
+                <div>
+                   <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-2">{lot.nom}</h3>
+                   <div className="flex items-center gap-2 text-slate-500 font-mono text-sm">
+                      <QrCode size={14} className="text-cyan-500" />
+                      ID: {lot._id}
+                   </div>
+                </div>
+                <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+                  Statut: {lot.statut || "Actif"}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+                {[
+                  { label: "Espèce", value: lot.espece, icon: <Fish className="text-blue-400" /> },
+                  { label: "Phase", value: lot.stade, icon: <Activity className="text-purple-400" /> },
+                  { label: "Poids Moy.", value: `${lot.poidsMoyen || 0}g`, icon: <Scale className="text-amber-400" /> },
+                  { label: "Taille Moy.", value: `${lot.tailleMoyenne || 0}cm`, icon: <Ruler className="text-emerald-400" /> }
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      {item.icon}
+                      <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                    </div>
+                    <span className="text-lg font-bold text-slate-200">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-4 pt-8 border-t border-white/5">
+                <h4 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Milieu de culture</h4>
+                <div className="flex items-center gap-4 p-4 bg-cyan-500/5 border border-cyan-500/10 rounded-2xl">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                    <MapPin size={20} />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Quantité</p>
-                    <p className="font-medium text-lg">{lot.quantite} poissons</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                    <Ruler size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Taille moyenne</p>
-                    <p className="font-medium text-lg">{lot.tailleMoyenne || "N/A"} cm</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
-                    <Scale size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Poids moyen</p>
-                    <p className="font-medium text-lg">{lot.poidsMoyen || "N/A"} g</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                    <Activity size={20} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Stade</p>
-                    <p className="font-medium text-lg">{traduireStade(lot.stade)}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <h4 className="text-lg font-medium text-gray-800 mb-4">Dates importantes</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-1">Date de création</p>
-                    <p className="font-medium">{formatDate(lot.dateCreation)}</p>
-                  </div>
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-600 mb-1">Date de récolte estimée</p>
-                    <p className="font-medium">{formatDate(lot.dateRecolteEstimee)}</p>
+                    <p className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">Bassin Source</p>
+                    <p className="font-bold text-slate-200">{lot.bassinNom}</p>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Environmental History */}
+            {lot.mesures && lot.mesures.length > 0 && (
+              <div className="premium-card">
+                <h3 className="text-xl font-black text-white uppercase tracking-tight mb-8">Historique Environnemental</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {[
+                    { label: "Température", key: "temperature", color: "#ef4444", unit: "°C" },
+                    { label: "Oxygène", key: "oxygen", color: "#3b82f6", unit: "mg/L" }
+                  ].map(m => (
+                    <div key={m.key} className="space-y-4">
+                      <div className="flex justify-between items-center px-2">
+                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{m.label}</span>
+                        <span className="text-sm font-bold text-slate-200">{lot.statistiques?.[m.key as keyof typeof lot.statistiques]?.moyenne || 0}{m.unit} <span className="text-[10px] text-slate-500">(moy)</span></span>
+                      </div>
+                      <div className="h-40">
+                         <Line data={getChartData(lot.mesures, m.key, m.color)!} options={chartOptions} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-              <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 p-4 border-b border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <Waves className="text-cyan-500" size={20} />
-                  Informations du bassin
-                </h3>
-              </div>
-              
-              <div className="p-6">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
-                      <Waves size={20} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Bassin</p>
-                      <p className="font-medium text-lg">{lot.bassinNom || "Non spécifié"}</p>
-                    </div>
-                  </div>
-                  
-                  {lot.bassinType && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <Info size={20} />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Type de bassin</p>
-                        <p className="font-medium text-lg">{lot.bassinType}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {lot.bassinVolume && (
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                        <Droplets size={20} />
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Volume</p>
-                        <p className="font-medium text-lg">{lot.bassinVolume} m³</p>
-                      </div>
-                    </div>
-                  )}
+          {/* Sidebar Info */}
+          <div className="space-y-8">
+            <div className="premium-card border-cyan-500/30 bg-gradient-to-br from-cyan-900/20 to-blue-900/20">
+              <Award className="text-cyan-400 mb-6" size={48} />
+              <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4 leading-none">Technologie BlueTrace.</h3>
+              <p className="text-sm text-cyan-100/60 leading-relaxed mb-8">Ce lot est monitoré par le système autonomique de BlueTrace Tech, garantissant une intégrité absolue des données de traçabilité.</p>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 text-xs font-bold text-emerald-400">
+                  <CheckCircle2 size={16} /> DONNÉES INALTÉRABLES
+                </div>
+                <div className="flex items-center gap-3 text-xs font-bold text-emerald-400">
+                  <CheckCircle2 size={16} /> ORIGINE CERTIFIÉE
                 </div>
               </div>
             </div>
-            
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl p-6 text-white">
-              <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                <Award size={20} />
-                Certification AquaAI
-              </h3>
-              <p className="mb-4 text-blue-50">Ce lot est certifié conforme aux normes de qualité et de traçabilité AquaAI.</p>
-              <div className="flex justify-center mt-4">
-                <button 
-                  onClick={telechargerCertificat}
-                  className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition flex items-center gap-2"
-                >
-                  <Download size={16} />
-                  Télécharger le certificat
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Suivi environnemental */}
-        {loadingMesures ? (
-          <div className="bg-white rounded-xl shadow-md p-8 text-center mb-12">
-            <div className="inline-flex h-16 w-16 rounded-full bg-blue-50 items-center justify-center mb-4">
-              <div className="h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-            <h3 className="text-xl font-medium text-gray-800 mb-2">Chargement des données environnementales</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Nous récupérons les données des capteurs IoT pour ce bassin...
-            </p>
-          </div>
-        ) : hasMesures ? (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4 mt-12">Suivi environnemental du bassin</h2>
-            <p className="text-gray-600 mb-6">
-              Ce lot est élevé dans le bassin "{lot?.bassinNom}" qui est équipé de capteurs IoT permettant 
-              de surveiller en temps réel les paramètres environnementaux. Voici les données collectées au cours 
-              des 30 derniers jours:
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div className="bg-gradient-to-r from-blue-50 to-red-50 p-4 border-b border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Thermometer className="text-red-500" size={20} />
-                    Suivi de la température
-                  </h3>
-                </div>
-                <div className="p-4">
-                  {preparerDonneesGraphique(lot.mesures, "temperature") && (
-                    <>
-                      <Line 
-                        data={preparerDonneesGraphique(lot.mesures, "temperature")!} 
-                        options={chartOptions} 
-                        height={180}
-                      />
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-500">Min:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.temperature?.min || "N/A"}°C</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Moyenne:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.temperature?.moyenne || "N/A"}°C</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Max:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.temperature?.max || "N/A"}°C</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 border-b border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Droplets className="text-purple-500" size={20} />
-                    Suivi du pH
-                  </h3>
-                </div>
-                <div className="p-4">
-                  {preparerDonneesGraphique(lot.mesures, "ph") && (
-                    <>
-                      <Line 
-                        data={preparerDonneesGraphique(lot.mesures, "ph")!} 
-                        options={chartOptions} 
-                        height={180}
-                      />
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-500">Min:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.ph?.min || "N/A"}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Moyenne:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.ph?.moyenne || "N/A"}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Max:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.ph?.max || "N/A"}</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 border-b border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Droplets className="text-blue-500" size={20} />
-                    Suivi de l'oxygène dissous
-                  </h3>
-                </div>
-                <div className="p-4">
-                  {preparerDonneesGraphique(lot.mesures, "oxygen") && (
-                    <>
-                      <Line 
-                        data={preparerDonneesGraphique(lot.mesures, "oxygen")!} 
-                        options={chartOptions} 
-                        height={180}
-                      />
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-500">Min:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.oxygen?.min || "N/A"} mg/L</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Moyenne:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.oxygen?.moyenne || "N/A"} mg/L</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Max:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.oxygen?.max || "N/A"} mg/L</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                <div className="bg-gradient-to-r from-cyan-50 to-teal-50 p-4 border-b border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Droplets className="text-cyan-500" size={20} />
-                    Suivi de la salinité
-                  </h3>
-                </div>
-                <div className="p-4">
-                  {preparerDonneesGraphique(lot.mesures, "salinity") && (
-                    <>
-                      <Line 
-                        data={preparerDonneesGraphique(lot.mesures, "salinity")!} 
-                        options={chartOptions} 
-                        height={180}
-                      />
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg flex justify-between text-sm">
-                        <div>
-                          <span className="text-gray-500">Min:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.salinity?.min || "N/A"} ppt</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Moyenne:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.salinity?.moyenne || "N/A"} ppt</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Max:</span> 
-                          <span className="font-medium ml-1">{lot.statistiques?.salinity?.max || "N/A"} ppt</span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-blue-50 rounded-xl p-6 mb-12 border border-blue-100">
-              <h3 className="text-lg font-medium text-blue-800 mb-2 flex items-center gap-2">
-                <Info size={20} className="text-blue-600" />
-                Interprétation des données
-              </h3>
-              <p className="text-blue-700 mb-4">
-                Les paramètres environnementaux du bassin sont essentiels pour assurer une croissance optimale 
-                et un bien-être des poissons. Voici les plages idéales pour l'espèce {lot.espece}:
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <div className="font-medium text-blue-800 mb-1">Température</div>
-                  <div className="text-blue-700">
-                    Idéal: 23-27°C pour le stade {traduireStade(lot.stade)}
-                  </div>
-                </div>
-                
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <div className="font-medium text-blue-800 mb-1">pH</div>
-                  <div className="text-blue-700">
-                    Idéal: 6.8-7.5 pour une bonne croissance
-                  </div>
-                </div>
-                
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <div className="font-medium text-blue-800 mb-1">Oxygène dissous</div>
-                  <div className="text-blue-700">
-                    Idéal: {'>'}5mg/L pour éviter le stress
-                  </div>
-                </div>
-                
-                <div className="bg-white p-3 rounded-lg border border-blue-100">
-                  <div className="font-medium text-blue-800 mb-1">Salinité</div>
-                  <div className="text-blue-700">
-                    Idéal: {lot.espece.toLowerCase().includes('tilapia') ? '0-15' : '0-3'} ppt selon l'espèce
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="bg-white rounded-xl shadow-md p-8 text-center mb-12">
-            <div className="inline-flex h-20 w-20 rounded-full bg-blue-50 items-center justify-center mb-4">
-              <LineChart size={32} className="text-blue-500" />
-            </div>
-            <h3 className="text-xl font-medium text-gray-800 mb-2">Données environnementales non disponibles</h3>
-            <p className="text-gray-600 max-w-md mx-auto">
-              {lot.bassinId 
-                ? `Ce lot est élevé dans le bassin "${lot.bassinNom}" mais les données environnementales ne sont pas encore disponibles.`
-                : "Ce lot n'est pas actuellement associé à un bassin équipé de capteurs IoT."}
-            </p>
-          </div>
-        )}
-
-        {/* Certificat d'authenticité */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-            <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 border-b border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Award className="text-green-600" size={20} />
-                Certificat de traçabilité
-              </h3>
-            </div>
-            
-            <div className="p-6">
-              <div className="mb-6">
-                <p className="text-gray-600 mb-4">
-                  Ce certificat atteste que ce lot de poissons a été élevé dans des conditions 
-                  contrôlées et tracées tout au long de son cycle de vie, suivant les bonnes pratiques 
-                  d'aquaculture responsable.
-                </p>
-              </div>
-              
-              <div ref={certificateRef} className="border-2 border-green-100 rounded-lg p-6 bg-green-50/30 relative">
-                <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
-                  <Fish size={128} />
-                </div>
-                <div className="text-center mb-4">
-                  <h4 className="text-xl font-bold text-green-800">Certificat d'Authenticité</h4>
-                  <p className="text-sm text-green-700">AquaAI - Solutions de traçabilité aquacole</p>
-                </div>
-                
-                <div className="space-y-4 relative z-10">
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="text-green-700 font-medium">ID du lot:</div>
-                    <div className="col-span-2 font-mono">{lot._id}</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="text-green-700 font-medium">Nom du lot:</div>
-                    <div className="col-span-2">{lot.nom}</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="text-green-700 font-medium">Espèce:</div>
-                    <div className="col-span-2">{lot.espece}</div>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="text-green-700 font-medium">Date de création:</div>
-                    <div className="col-span-2">{formatDate(lot.dateCreation)}</div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-between items-center mt-8 pt-4 border-t border-green-100">
-                  <div className="text-xs text-green-700">
-                    Vérifié le {new Date().toLocaleDateString('fr-FR')}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="text-green-600" size={16} />
-                    <span className="text-sm font-medium text-green-700">Certifié AquaAI</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 flex justify-center">
-                <button 
-                  onClick={telechargerCertificat}
-                  className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2"
-                >
-                  <Download size={16} />
-                  Télécharger le certificat
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 border-b border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                  <Info className="text-blue-500" size={20} />
-                  Informations de vérification
-                </h3>
-              </div>
-              
-              <div className="p-6">
-                <p className="text-gray-600 mb-4">
-                  Vous pouvez vérifier l'authenticité de ce certificat en utilisant l'une des 
-                  méthodes suivantes:
-                </p>
-                
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mt-0.5">
-                      <span className="text-sm font-medium">1</span>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 font-medium">Scanner le QR code</p>
-                      <p className="text-gray-600 text-sm">
-                        Utilisez l'application AquaAI Scanner pour vérifier ce certificat.
-                      </p>
-                    </div>
-                  </li>
-                  
-                  <li className="flex items-start gap-2">
-                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mt-0.5">
-                      <span className="text-sm font-medium">2</span>
-                    </div>
-                    <div>
-                      <p className="text-gray-700 font-medium">Vérifier en ligne</p>
-                      <p className="text-gray-600 text-sm">
-                        Visitez <span className="text-blue-600">verify.aquaai.com</span> et saisissez l'ID du lot.
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+            <div className="premium-card">
+               <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Validation Blockchain</h4>
+               <div className="p-4 bg-white/5 rounded-xl border border-white/5 font-mono text-[10px] break-all text-slate-400">
+                  HASH: {Buffer.from(lot._id).toString('hex').padEnd(64, '0').slice(0, 64)}
+               </div>
             </div>
           </div>
         </div>
       </main>
-      
-      <footer className="bg-gray-800 text-gray-300 py-10 px-4 mt-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <div className="flex items-center gap-3 mb-4 md:mb-0">
-              <div className="bg-white/10 p-2 rounded-lg">
-                <Fish size={24} className="text-white" />
+
+      <footer className="py-20 border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+           <div className="flex justify-center items-center gap-3 mb-8">
+              <div className="w-8 h-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-cyan-400">
+                <ShieldCheck size={18} />
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">AquaAI</h3>
-                <p className="text-gray-400 text-sm">Traçabilité intelligente pour l'aquaculture</p>
-              </div>
-            </div>
-            
-            <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <span className="sr-only">Twitter</span>
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                </svg>
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <span className="sr-only">LinkedIn</span>
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path fillRule="evenodd" d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" clipRule="evenodd" />
-                </svg>
-              </a>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-700 pt-8 pb-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <h4 className="text-white font-medium mb-3">À propos</h4>
-                <p className="text-gray-400 text-sm">
-                  AquaAI fournit des solutions de traçabilité avancées pour l'industrie aquacole, 
-                  garantissant transparence et confiance tout au long de la chaîne de valeur.
-                </p>
-              </div>
-              
-              <div>
-                <h4 className="text-white font-medium mb-3">Liens utiles</h4>
-                <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-white transition">Accueil</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition">Solutions</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition">À propos</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition">Contact</a></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="text-white font-medium mb-3">Contact</h4>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li>contact@aquaai.com</li>
-                  <li>+33 1 23 45 67 89</li>
-                  <li>123 Rue de l'Innovation, 75000 Paris</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center text-gray-500 text-sm mt-8">
-            <p>© {new Date().getFullYear()} AquaAI - Tous droits réservés</p>
-          </div>
+              <span className="text-xl font-black text-white uppercase tracking-tighter">BlueTrace Tech</span>
+           </div>
+           <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.4em]">© 2026 BlueTrace Tech — Ecosystem of Intelligence</p>
         </div>
       </footer>
-
-      <style jsx global>{`
-        @media print {
-          header, footer, .bg-white.border-b, button {
-            display: none !important;
-          }
-          main {
-            padding: 0 !important;
-          }
-          body {
-            background: white !important;
-          }
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-in-down {
-          animation: fadeInDown 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
-} 
+}

@@ -7,7 +7,7 @@ require('dotenv').config();
 // Railway utilise PORT, mais on peut aussi utiliser WS_PORT
 const WS_PORT = process.env.PORT || process.env.WS_PORT || 4001;
 const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
-const SECRET_TOKEN = process.env.IOT_WS_TOKEN || 'TON_TOKEN_SECRET';
+const SECRET_TOKEN = process.env.NEXT_PUBLIC_IOT_WS_TOKEN || process.env.IOT_WS_TOKEN || 'TON_TOKEN_SECRET';
 
 // === CLASSES ET STRUCTURES ===
 class IoTClient {

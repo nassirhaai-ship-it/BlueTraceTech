@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import useSWR, { mutate } from "swr";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect, useRef } from "react";
-import { Users, Shield, Activity, Database, AlertTriangle, CheckCircle, Trash2, Plus, X, Wifi, WifiOff, Edit, Save } from "lucide-react";
+import { Users, Shield, Activity, Database, AlertTriangle, CheckCircle, Trash2, Plus, X, Wifi, WifiOff, Edit, Save, RefreshCw } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json()).then(data => {
   // Si l'API retourne un objet avec une propriété 'mesures', on l'extrait
@@ -17,10 +17,15 @@ const fetcher = (url: string) => fetch(url).then(res => res.json()).then(data =>
 });
 
 export default function AdminDashboard() {
-  const { data: mesures, isLoading: mesuresLoading } = useSWR("/api/mesures", fetcher);
-  const { data: alertes, isLoading: alertesLoading } = useSWR("/api/alertes", fetcher);
-  const { data: utilisateurs = [], isLoading: usersLoading, error: usersError } = useSWR("/api/utilisateurs", fetcher);
-  const { data: bassins = [], isLoading: bassinsLoading } = useSWR("/api/bassins", fetcher);
+  const { data: rawMesures, isLoading: mesuresLoading } = useSWR("/api/mesures", fetcher);
+  const { data: rawAlertes, isLoading: alertesLoading } = useSWR("/api/alertes", fetcher);
+  const { data: rawUtilisateurs = [], isLoading: usersLoading, error: usersError } = useSWR("/api/utilisateurs", fetcher);
+  const { data: rawBassins = [], isLoading: bassinsLoading } = useSWR("/api/bassins", fetcher);
+
+  const mesures = Array.isArray(rawMesures) ? rawMesures : [];
+  const alertes = Array.isArray(rawAlertes) ? rawAlertes : [];
+  const utilisateurs = Array.isArray(rawUtilisateurs) ? rawUtilisateurs : [];
+  const bassins = Array.isArray(rawBassins) ? rawBassins : [];
   const { data: iotStatus, isLoading: iotLoading } = useSWR("/api/iot/status", fetcher);
   const [localIotStatus, setLocalIotStatus] = useState<any>(null);
   const [wsConnected, setWsConnected] = useState(false);
@@ -51,7 +56,7 @@ export default function AdminDashboard() {
   const [selectedBassinChart, setSelectedBassinChart] = useState<string>("");
   const bassinOptions = (bassins || []).map((b: any) => ({ id: b._id, nom: b.nom || b.name || b._id }));
   const [realtimeMesures, setRealtimeMesures] = useState<any[]>([]);
-  const wsToken = process.env.NEXT_PUBLIC_IOT_WS_TOKEN || 'TON_SECRET_TOKEN';
+  const wsToken = process.env.NEXT_PUBLIC_IOT_WS_TOKEN || '';
   // Utiliser l'URL WebSocket depuis les variables d'environnement ou localhost par défaut
   const wsBaseUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? 
     `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:4001` : 
@@ -491,116 +496,94 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <main className="w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-gray-900 relative overflow-hidden">
+      {/* Background ambient glow */}
+      <div className="absolute top-10 right-10 w-[30%] h-[30%] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none"></div>
+
+      <main className="w-full relative z-10">
         {toast && (
           <div className={`fixed top-16 sm:top-20 right-3 sm:right-6 z-50 px-3 sm:px-4 py-2 rounded-lg shadow-lg text-white text-xs sm:text-sm ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}>{toast.message}</div>
         )}
-        <div className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-4 md:px-6 py-3 sm:py-4 mb-4 sm:mb-6 lg:mb-8 sticky top-16 lg:top-0 z-10">
-          <div className="flex flex-col gap-3 sm:gap-4">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="bg-white shadow-sm border-b border-gray-200 px-3 sm:px-4 md:px-6 py-4 sm:py-6 mb-4 sm:mb-6 lg:mb-8 sticky top-16 lg:top-0 z-20">
+          <div className="flex flex-col gap-4 sm:gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600" />
-                  <span>Dashboard Administrateur</span>
-                </h1>
-                <p className="text-xs sm:text-sm text-gray-600 mt-1">Gestion complète de la ferme aquacole</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-md">
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent truncate">
+                      Dashboard Administrateur
+                    </h1>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                      BlueTrace Tech System
+                    </p>
+                  </div>
+                </div>
               </div>
-              {/* Filtre bassin - Mobile friendly */}
-              <div className="w-full sm:w-auto">
-                <select 
-                  value={selectedBassin} 
-                  onChange={(e) => {
-                    console.log('🔄 Changement selectedBassin:', e.target.value);
-                    setSelectedBassin(e.target.value);
-                  }}
-                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm"
+              
+              <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                {/* Filtre bassin - Premium style */}
+                <div className="relative group flex-1 sm:flex-none">
+                  <select 
+                    value={selectedBassin} 
+                    onChange={(e) => setSelectedBassin(e.target.value)}
+                    className="w-full sm:w-64 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-cyan-500 outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    {bassinsLoading ? (
+                      <option>Chargement...</option>
+                    ) : bassins.length === 0 ? (
+                      <option>Aucun bassin</option>
+                    ) : (
+                      bassins.map((b: any) => (
+                        <option key={b._id} value={b._id || b.nom || b.name}>
+                          {b.nom || b.name || b._id}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={refreshIoTData}
+                  disabled={iotUpdating}
+                  className="p-2 bg-cyan-50 text-cyan-600 rounded-lg hover:bg-cyan-100 transition-colors border border-cyan-100 disabled:opacity-50"
+                  title="Rafraîchir les données"
                 >
-                  {bassinsLoading ? (
-                    <option>Chargement...</option>
-                  ) : bassins.length === 0 ? (
-                    <option>Aucun bassin</option>
-                  ) : (
-                    bassins.map((b: any) => (
-                      <option key={b._id} value={b._id || b.nom || b.name}>
-                        {b.nom || b.name || b._id}
-                      </option>
-                    ))
-                  )}
-                </select>
+                  <RefreshCw className={`w-5 h-5 ${iotUpdating ? 'animate-spin' : ''}`} />
+                </button>
               </div>
             </div>
             
-            {/* Indicateurs de statut - Responsive avec icônes */}
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4 text-xs sm:text-sm">
-              <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-green-50 rounded-lg border border-green-200">
-                <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" />
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></div>
-                <span className="text-gray-700 whitespace-nowrap">Système opérationnel</span>
+            {/* Indicators section */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-semibold border border-green-100">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Opérationnel
               </div>
               
-              {/* Indicateur WebSocket */}
-              <div className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg border flex-shrink-0 ${
-                wsConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border ${
+                wsConnected ? 'bg-cyan-50 text-cyan-700 border-cyan-100' : 'bg-red-50 text-red-700 border-red-100'
               }`}>
-                {wsConnected ? (
-                  <Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 flex-shrink-0" />
-                ) : (
-                  <WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 flex-shrink-0" />
-                )}
-                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${wsConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
-                <span className="text-gray-700 whitespace-nowrap hidden sm:inline">
-                  {wsConnected ? 'Temps réel actif' : 'Temps réel inactif'}
-                </span>
-                <span className="text-gray-700 sm:hidden">
-                  {wsConnected ? 'Temps réel' : 'Offline'}
-                </span>
+                <Wifi className="w-4 h-4" />
+                {wsConnected ? 'Temps réel' : 'Déconnecté'}
               </div>
-              
-              {/* Indicateur IoT global */}
+
               {localIotStatus && (
-                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200 flex-wrap">
-                  <Activity className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
-                  <div className={`w-2 h-2 rounded-full animate-pulse flex-shrink-0 ${
-                    localIotStatus.stats?.online > 0 ? 'bg-green-500' : 'bg-red-500'
-                  }`}></div>
-                  <span className="text-gray-700 whitespace-nowrap">
-                    <span className="hidden sm:inline">IoT: </span>
-                    {localIotStatus.stats?.online || 0}/{localIotStatus.stats?.total || 0}
-                  </span>
-                  <button 
-                    onClick={refreshIoTData}
-                    disabled={iotUpdating}
-                    className={`p-1 transition-colors rounded flex-shrink-0 ${
-                      iotUpdating 
-                        ? 'text-gray-400 cursor-not-allowed' 
-                        : 'text-gray-600 hover:text-cyan-600 hover:bg-cyan-50'
-                    }`}
-                    title="Rafraîchir les données IoT"
-                    aria-label="Rafraîchir"
-                  >
-                    {iotUpdating ? (
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    ) : (
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    )}
-                  </button>
-                  {lastIoTUpdate && (
-                    <span className="text-xs text-gray-500 hidden lg:inline">
-                      {formatTimeAgo(lastIoTUpdate)}
-                    </span>
-                  )}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-100">
+                  <Activity className="w-4 h-4" />
+                  Terminaux: {localIotStatus.stats?.online || 0}/{localIotStatus.stats?.total || 0}
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8 px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 px-3 sm:px-4 md:px-6 lg:px-8">
           {[
             { 
               title: "Utilisateurs", 
@@ -608,7 +591,7 @@ export default function AdminDashboard() {
               value: utilisateurs.length.toString(), 
               icon: Users, 
               trend: `${usersByRole.operateur} opérateurs`, 
-              color: "from-blue-500 to-cyan-500",
+              color: "from-cyan-500 to-blue-600",
               status: "normal"
             },
             { 
@@ -616,8 +599,8 @@ export default function AdminDashboard() {
               shortTitle: "Alertes",
               value: filteredByBassinAlertes.filter((a: any) => a.type === "error").length.toString(), 
               icon: AlertTriangle, 
-              trend: "À traiter", 
-              color: "from-red-500 to-pink-500",
+              trend: "Nécessite action", 
+              color: "from-red-500 to-rose-600",
               status: "alert"
             },
             { 
@@ -625,8 +608,8 @@ export default function AdminDashboard() {
               shortTitle: "IoT",
               value: localIotStatus?.stats ? `${localIotStatus.stats.online}/${localIotStatus.stats.total}` : "0/0", 
               icon: Wifi, 
-              trend: localIotStatus?.stats?.online > 0 ? "Actifs" : "Offline", 
-              color: localIotStatus?.stats?.online > 0 ? "from-green-500 to-emerald-500" : "from-red-500 to-pink-500",
+              trend: localIotStatus?.stats?.online > 0 ? "Performance OK" : "Signal faible", 
+              color: "from-indigo-500 to-purple-600",
               status: localIotStatus?.stats?.online > 0 ? "normal" : "error"
             },
             { 
@@ -634,29 +617,28 @@ export default function AdminDashboard() {
               shortTitle: "Perf",
               value: "98.5%", 
               icon: Activity, 
-              trend: "+2.3%", 
-              color: "from-purple-500 to-indigo-500",
+              trend: "Stable", 
+              color: "from-emerald-500 to-teal-600",
               status: "normal"
             }
           ].map((kpi, index) => {
             const IconComponent = kpi.icon;
             return (
-              <Card key={index} className="p-4 sm:p-5 lg:p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+              <Card key={index} className="p-4 sm:p-5 lg:p-6 bg-white shadow-sm border border-gray-100 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
-                      <span className="sm:hidden">{kpi.shortTitle}</span>
-                      <span className="hidden sm:inline">{kpi.title}</span>
+                      {kpi.title}
                     </p>
                     <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
-                    <p className={`text-xs sm:text-sm mt-1 truncate ${
+                    <p className={`text-xs mt-1 truncate ${
                       kpi.status === 'normal' ? 'text-green-600' : 
                       kpi.status === 'warning' ? 'text-yellow-600' : 'text-red-600'
                     }`}>
                       {kpi.trend}
                     </p>
                   </div>
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r ${kpi.color} flex items-center justify-center text-white flex-shrink-0 ml-2`}>
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-r ${kpi.color} flex items-center justify-center text-white shadow-md flex-shrink-0 ml-2`}>
                     <IconComponent className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
@@ -666,34 +648,41 @@ export default function AdminDashboard() {
         </div>
 
         {/* Section avancée des bassins d'aquaculture */}
-        <Card className="p-6 bg-white shadow-sm mb-8">
+        <Card className="mx-3 sm:mx-4 md:mx-6 lg:mx-8 p-4 sm:p-6 bg-white shadow-md border border-gray-100 mb-8 rounded-2xl">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                <span className="text-white text-lg">🐟</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-cyan-50 rounded-lg flex items-center justify-center border border-cyan-100">
+                <span className="text-xl sm:text-2xl">🌊</span>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Bassins d'aquaculture</h3>
-              <span className="ml-2 text-sm text-gray-500">
-                {bassins?.length || 0} bassins actifs
-                {localIotStatus && (
-                  <span className="ml-2 text-xs">
-                    ({bassins?.filter((b: any) => getBassinIoTStatus(b._id).connected).length || 0} connectés IoT)
+              <div>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">Bassins d'Aquaculture</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="px-2 py-0.5 bg-cyan-50 text-cyan-600 text-xs font-semibold rounded-md border border-cyan-100">
+                    {bassins?.length || 0} Unités
                   </span>
-                )}
-              </span>
+                  {localIotStatus && (
+                    <span className="px-2 py-0.5 bg-green-50 text-green-600 text-xs font-semibold rounded-md border border-green-100">
+                      {bassins?.filter((b: any) => getBassinIoTStatus(b._id).connected).length || 0} Connectés
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <input
-              type="text"
-              placeholder="Rechercher un bassin..."
-              className="border rounded-lg px-3 py-2 w-full md:w-64"
-              value={userSearch}
-              onChange={e => setUserSearch(e.target.value)}
-            />
+            
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Rechercher une unité..."
+                className="w-full md:w-80 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-cyan-500 outline-none transition-all placeholder:text-gray-400"
+                value={userSearch}
+                onChange={e => setUserSearch(e.target.value)}
+              />
+            </div>
           </div>
           {bassinsLoading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
-              <span className="ml-2 text-gray-600">Chargement des bassins...</span>
+              <span className="ml-2 text-muted-foreground">Chargement des bassins...</span>
             </div>
           ) : bassins && bassins.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-3 sm:px-4 md:px-6 lg:px-8">
@@ -722,8 +711,8 @@ export default function AdminDashboard() {
                 const { connected, device } = getBassinIoTStatus(bassin._id);
                 return (
                   <div key={`${bassin._id || index}-${forceUpdate}-${connected}`} className="relative group flex justify-center">
-                    <div className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-10 border-2 border-transparent hover:border-cyan-300 transition-all duration-500 ease-in-out hover:shadow-lg cursor-pointer flex flex-col h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[340px] w-full max-w-xl overflow-hidden ${
-                      connected ? 'bg-gradient-to-br from-blue-50 to-cyan-50' : 'bg-gradient-to-br from-gray-50 to-slate-100'
+                    <div className={`relative rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-10 border-2 transition-all duration-300 ease-in-out hover:shadow-md hover:-translate-y-1 cursor-pointer flex flex-col h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[340px] w-full max-w-xl overflow-hidden ${
+                      connected ? 'bg-white border-cyan-100 shadow-sm hover:border-cyan-300' : 'bg-gray-50 border-gray-200 opacity-90'
                     }`}>
                       {/* Badge statut - masqué si IoT offline */}
                       {connected && (
@@ -784,39 +773,38 @@ export default function AdminDashboard() {
                         <h4 className="font-bold text-gray-900 text-lg sm:text-xl mb-1 truncate max-w-full px-2 text-center">
                           {bassin.nom || bassin.name || `Bassin ${index + 1}`}
                         </h4>
-                        <span className="text-xs sm:text-sm text-gray-500">{bassin.stade || 'En production'}</span>
+                        <span className="text-xs sm:text-sm text-gray-500 font-medium">{bassin.stade || 'En production'}</span>
                       </div>
                       
                       {/* Paramètres avec icônes */}
                       <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
-                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-white/60 rounded-lg" title="Température">
+                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100" title="Température">
                           <span className="text-base sm:text-lg">🌡️</span>
                           <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-xs text-gray-500 hidden sm:inline">Temp</span>
-                            <span className={`font-semibold text-xs sm:text-sm truncate ${temperature !== 'N/A' && parseFloat(temperature) > 25 ? 'text-red-600' : temperature !== 'N/A' && parseFloat(temperature) < 20 ? 'text-blue-600' : 'text-gray-900'}`}>
+                            <span className={`font-semibold text-xs sm:text-sm truncate ${temperature !== 'N/A' && parseFloat(temperature) > 25 ? 'text-rose-600' : temperature !== 'N/A' && parseFloat(temperature) < 20 ? 'text-blue-600' : 'text-gray-900'}`}>
                               {temperature !== 'N/A' ? `${temperature}°C` : 'N/A'}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-white/60 rounded-lg" title="pH">
+                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100" title="pH">
                           <span className="text-base sm:text-lg">🧪</span>
                           <div className="flex flex-col min-w-0 flex-1">
                             <span className="text-xs text-gray-500 hidden sm:inline">pH</span>
-                            <span className={`font-semibold text-xs sm:text-sm truncate ${ph !== 'N/A' && parseFloat(ph) > 8 ? 'text-red-600' : ph !== 'N/A' && parseFloat(ph) < 7 ? 'text-blue-600' : 'text-gray-900'}`}>
+                            <span className={`font-semibold text-xs sm:text-sm truncate ${ph !== 'N/A' && parseFloat(ph) > 8 ? 'text-rose-600' : ph !== 'N/A' && parseFloat(ph) < 7 ? 'text-blue-600' : 'text-gray-900'}`}>
                               {ph !== 'N/A' ? ph : 'N/A'}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-white/60 rounded-lg" title="Oxygène">
+                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100" title="Oxygène">
                           <span className="text-base sm:text-lg">💧</span>
                           <div className="flex flex-col min-w-0 flex-1">
                             <span className="text-xs text-gray-500 hidden sm:inline">O₂</span>
-                            <span className={`font-semibold text-xs sm:text-sm truncate ${oxygen !== 'N/A' && parseFloat(oxygen) < 5 ? 'text-red-600' : oxygen !== 'N/A' && parseFloat(oxygen) < 6 ? 'text-yellow-600' : 'text-gray-900'}`}>
+                            <span className={`font-semibold text-xs sm:text-sm truncate ${oxygen !== 'N/A' && parseFloat(oxygen) < 5 ? 'text-rose-600' : oxygen !== 'N/A' && parseFloat(oxygen) < 6 ? 'text-amber-600' : 'text-gray-900'}`}>
                               {oxygen !== 'N/A' ? `${oxygen}` : 'N/A'}
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-white/60 rounded-lg" title="Salinité">
+                        <div className="flex items-center gap-1.5 sm:gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100" title="Salinité">
                           <span className="text-base sm:text-lg">🧂</span>
                           <div className="flex flex-col min-w-0 flex-1">
                             <span className="text-xs text-gray-500 hidden sm:inline">Sal</span>
@@ -832,32 +820,32 @@ export default function AdminDashboard() {
                         <span className="hidden sm:inline">Dernière mesure: </span>
                         <span className="sm:hidden">Dernière: </span>
                         {derniereMesure ? (
-                          <span className="block sm:inline">
+                          <span className="block sm:inline font-medium text-gray-700">
                             <span className="sm:hidden">{new Date(derniereMesure.date).toLocaleDateString()}</span>
                             <span className="hidden sm:inline">{new Date(derniereMesure.date).toLocaleString()}</span>
                           </span>
                         ) : (
                           'Aucune'
                         )}
-                        {!connected && <span className="text-red-600 ml-1">(Offline)</span>}
+                        {!connected && <span className="text-rose-600 ml-1">(Offline)</span>}
                         {connected && device && (
-                          <span className="text-green-600 ml-1 animate-pulse hidden sm:inline">
+                          <span className="text-emerald-600 ml-1 animate-pulse hidden sm:inline">
                             ✓ {device.lastSeen ? formatTimeAgo(new Date(device.lastSeen)) : 'Maintenant'}
                           </span>
                         )}
                       </div>
                       <div className="mt-auto w-full">
-                        <div className="flex flex-row gap-2 w-full justify-center items-center pt-3 sm:pt-4 border-t border-gray-200 bg-white/60 rounded-b-xl sm:rounded-b-2xl">
+                        <div className="flex flex-row gap-2 w-full justify-center items-center pt-3 sm:pt-4 border-t border-gray-100 bg-gray-50/50 rounded-b-xl sm:rounded-b-2xl">
                           <button 
                             onClick={() => openBassinDetails(bassin)}
-                            className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 rounded-lg bg-cyan-100 text-cyan-700 hover:bg-cyan-200 text-xs sm:text-sm font-medium transition whitespace-nowrap"
+                            className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-100 text-xs sm:text-sm font-semibold transition whitespace-nowrap border border-cyan-100"
                           >
                             <span className="text-base sm:text-lg">🔎</span>
                             <span className="hidden sm:inline">Détails</span>
                           </button>
                           <button 
                             onClick={() => openBassinHistory(bassin)}
-                            className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs sm:text-sm font-medium transition whitespace-nowrap"
+                            className="flex-1 flex items-center justify-center gap-1 px-2 sm:px-3 py-2 rounded-lg bg-white text-gray-700 hover:bg-gray-50 text-xs sm:text-sm font-semibold transition whitespace-nowrap border border-gray-200 shadow-sm"
                           >
                             <span className="text-base sm:text-lg">📈</span>
                             <span className="hidden sm:inline">Historique</span>
@@ -871,13 +859,13 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-200">
                 <span className="text-2xl">🐟</span>
               </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">Aucun bassin configuré</h4>
-              <p className="text-gray-600 mb-4">Ajoutez votre premier bassin pour commencer le monitoring</p>
+              <h4 className="text-lg font-bold text-gray-900 mb-2">Aucun bassin configuré</h4>
+              <p className="text-gray-500 mb-4">Ajoutez votre premier bassin pour commencer le monitoring</p>
               <button
-                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition-all"
                 onClick={() => setShowAddBassin(true)}
               >
                 Ajouter un bassin
@@ -887,14 +875,14 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Table des 5 dernières mesures complètes */}
-        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-sm mb-4 sm:mb-6 lg:mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
+        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-md border border-gray-100 rounded-2xl mb-4 sm:mb-6 lg:mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <Database className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-600 flex-shrink-0" />
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">5 dernières mesures</h3>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">5 dernières mesures</h3>
             </div>
             <button 
-              className="bg-cyan-600 hover:bg-cyan-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 w-full sm:w-auto" 
+              className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 w-full sm:w-auto transition-colors" 
               onClick={exportMesuresCSV}
             >
               <Database className="w-4 h-4" />
@@ -905,7 +893,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="min-w-full text-xs sm:text-sm">
               <thead>
-                <tr className="bg-slate-100">
+                <tr className="bg-gray-50 border-y border-gray-100 text-gray-600 font-semibold">
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap">Date</th>
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden sm:table-cell">Bassin</th>
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap">🌡️ Temp</th>
@@ -915,7 +903,7 @@ export default function AdminDashboard() {
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden lg:table-cell">🌫️ Turb</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {(() => {
                   const all = Array.isArray(mesures) ? mesures : [];
                   // Trie par date décroissante et prend les 5 dernières mesures
@@ -925,15 +913,17 @@ export default function AdminDashboard() {
                   return last5.map((m: any, idx: number) => {
                     const bassinName = m.bassin || m.bassinId || '-';
                     return (
-                      <tr key={idx} className="border-b hover:bg-gray-50">
+                      <tr key={idx} className="hover:bg-gray-50/50 transition-colors text-gray-700">
                         <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                          <span className="sm:hidden">{m.date || m.timestamp || m.createdAt ? new Date(m.date || m.timestamp || m.createdAt).toLocaleDateString() : '-'}</span>
-                          <span className="hidden sm:inline">{m.date || m.timestamp || m.createdAt ? new Date(m.date || m.timestamp || m.createdAt).toLocaleString() : '-'}</span>
+                          <span className="sm:hidden font-medium">{m.date || m.timestamp || m.createdAt ? new Date(m.date || m.timestamp || m.createdAt).toLocaleDateString() : '-'}</span>
+                          <span className="hidden sm:inline font-medium">{m.date || m.timestamp || m.createdAt ? new Date(m.date || m.timestamp || m.createdAt).toLocaleString() : '-'}</span>
                         </td>
-                        <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap hidden sm:table-cell">{bassinName}</td>
+                        <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap hidden sm:table-cell">
+                          <span className="px-2 py-1 bg-gray-100 rounded font-medium text-gray-900">{bassinName}</span>
+                        </td>
                         <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                           <span className="sm:hidden">{typeof m.temperature !== 'undefined' ? `${m.temperature}°` : '-'}</span>
-                          <span className="hidden sm:inline">{typeof m.temperature !== 'undefined' ? m.temperature : '-'}</span>
+                          <span className="hidden sm:inline font-semibold">{typeof m.temperature !== 'undefined' ? m.temperature : '-'}</span>
                           <div className="sm:hidden text-xs text-gray-500 mt-0.5">{bassinName}</div>
                         </td>
                         <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">{typeof m.ph !== 'undefined' ? m.ph : '-'}</td>
@@ -949,11 +939,11 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-sm mb-4 sm:mb-6 lg:mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
+        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-md border border-gray-100 rounded-2xl mb-4 sm:mb-6 lg:mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900">
                 <span className="hidden sm:inline">Gestion des utilisateurs</span>
                 <span className="sm:hidden">Utilisateurs</span>
               </h3>
@@ -962,12 +952,12 @@ export default function AdminDashboard() {
               <input 
                 type="text" 
                 placeholder="Rechercher..." 
-                className="border rounded-lg px-3 py-2 text-sm w-full sm:w-auto flex-1 sm:flex-none" 
+                className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none w-full sm:w-auto flex-1 sm:flex-none" 
                 value={userSearch} 
                 onChange={e => setUserSearch(e.target.value)} 
               />
               <button 
-                className="flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm w-full sm:w-auto" 
+                className="flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold shadow-md px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm w-full sm:w-auto transition-colors" 
                 onClick={() => setShowAddUser(true)}
               >
                 <Plus className="w-4 h-4" /> 
@@ -979,7 +969,7 @@ export default function AdminDashboard() {
           {usersLoading && (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
-              <span className="ml-2 text-gray-600 text-sm">Chargement...</span>
+              <span className="ml-2 text-gray-500 text-sm">Chargement...</span>
             </div>
           )}
           {usersError && (
@@ -990,23 +980,23 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="min-w-full text-xs sm:text-sm">
               <thead>
-                <tr className="bg-slate-100">
+                <tr className="bg-gray-50 border-y border-gray-100 text-gray-600 font-semibold">
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap">👤 Nom</th>
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap hidden sm:table-cell">📧 Email</th>
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap">🎭 Rôle</th>
                   <th className="p-2 sm:p-3 text-left whitespace-nowrap">⚙️ Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {paginatedUsers.map((user: any) => (
-                  <tr key={user._id} className="border-b hover:bg-gray-50">
+                  <tr key={user._id} className="hover:bg-gray-50/50 transition-colors text-gray-700">
                     <td className="p-2 sm:p-3 text-xs sm:text-sm">
                       {editUserId === user._id ? (
                         <input className="border rounded px-2 py-1 text-xs sm:text-sm w-full" value={editUser.name} onChange={e => setEditUser({ ...editUser, name: e.target.value })} />
                       ) : (
                         <div className="flex flex-col">
                           <span className="font-medium">{user.name || user.nom}</span>
-                          <span className="text-xs text-gray-500 sm:hidden">{user.email}</span>
+                          <span className="text-xs text-muted-foreground sm:hidden">{user.email}</span>
                         </div>
                       )}
                     </td>
@@ -1041,7 +1031,7 @@ export default function AdminDashboard() {
                             <span className="hidden sm:inline">Enregistrer</span>
                           </button>
                           <button 
-                            className="flex items-center gap-1 px-2 py-1 text-gray-500 hover:bg-gray-50 rounded text-xs sm:text-sm transition-colors" 
+                            className="flex items-center gap-1 px-2 py-1 text-muted-foreground hover:bg-accent/10 rounded text-xs sm:text-sm transition-colors" 
                             onClick={() => setEditUserId(null)}
                             title="Annuler"
                           >
@@ -1080,41 +1070,44 @@ export default function AdminDashboard() {
           {totalPages > 1 && (
             <div className="flex gap-2 mt-4">
               {Array.from({ length: totalPages }, (_, i) => (
-                <button key={i} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-cyan-600 text-white" : "bg-slate-100"}`} onClick={() => setPage(i + 1)}>{i + 1}</button>
+                <button key={i} className={`px-3 py-1 rounded ${page === i + 1 ? "bg-cyan-600 text-white" : "bg-accent/10"}`} onClick={() => setPage(i + 1)}>{i + 1}</button>
               ))}
             </div>
           )}
         </Card>
 
         {showAddUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8 w-full max-w-md relative">
               <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
                 onClick={() => setShowAddUser(false)}
               >
                 <X className="w-5 h-5" />
               </button>
-              <h2 className="text-xl font-bold mb-4">Ajouter un utilisateur</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <Users className="w-5 h-5 text-cyan-600" />
+                Ajouter un utilisateur
+              </h2>
               <form onSubmit={handleAddUser} className="flex flex-col gap-4">
                 <input
                   type="text"
-                  placeholder="Nom"
-                  className="border rounded-lg px-4 py-2"
+                  placeholder="Nom complet"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                   value={newUser.name}
                   onChange={e => setNewUser({ ...newUser, name: e.target.value })}
                   required
                 />
                 <input
                   type="email"
-                  placeholder="Email"
-                  className="border rounded-lg px-4 py-2"
+                  placeholder="Adresse email"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                   value={newUser.email}
                   onChange={e => setNewUser({ ...newUser, email: e.target.value })}
                   required
                 />
                 <select
-                  className="border rounded-lg px-4 py-2"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                   value={newUser.role}
                   onChange={e => setNewUser({ ...newUser, role: e.target.value })}
                 >
@@ -1122,64 +1115,79 @@ export default function AdminDashboard() {
                   <option value="operateur">Opérateur</option>
                   <option value="observateur">Observateur</option>
                 </select>
-                <button
-                  type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg"
-                  disabled={adding}
-                >
-                  {adding ? "Ajout..." : "Ajouter"}
-                </button>
+                <div className="flex gap-3 mt-4">
+                  <button
+                    type="button"
+                    className="flex-1 py-2.5 bg-gray-100 rounded-lg font-semibold text-gray-700 hover:bg-gray-200 transition-all text-sm"
+                    onClick={() => setShowAddUser(false)}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-cyan-600 rounded-lg font-semibold text-white hover:bg-cyan-700 transition-all text-sm flex justify-center items-center shadow-md"
+                    disabled={adding}
+                  >
+                    {adding ? "Ajout..." : "Ajouter"}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         )}
 
-        <Card className="p-6 bg-white shadow-sm mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <AlertTriangle className="w-6 h-6 text-red-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Alertes</h3>
-            <select className="ml-auto border rounded px-2 py-1" value={alertFilter} onChange={e => setAlertFilter(e.target.value)}>
+        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-md border border-gray-100 rounded-2xl mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+              <h3 className="text-lg font-bold text-gray-900">Alertes</h3>
+            </div>
+            <select className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none" value={alertFilter} onChange={e => setAlertFilter(e.target.value)}>
               <option value="">Toutes</option>
               <option value="error">Erreurs</option>
               <option value="warning">Avertissements</option>
               <option value="info">Informations</option>
             </select>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {filteredAlertes.slice(0, 10).map((alerte: any) => (
-              <div key={alerte._id} className={`flex items-center gap-3 p-3 rounded-lg border-l-4 ${
+              <div key={alerte._id} className={`flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-xl border-l-4 shadow-sm ${
                 alerte.type === 'error' ? 'bg-red-50 border-red-500' :
                 alerte.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
                 'bg-blue-50 border-blue-500'
               }`}>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">{alerte.message}</div>
-                  <div className="text-xs text-gray-500">{new Date(alerte.date).toLocaleString()}</div>
+                  <div className="font-semibold text-gray-900 text-sm">{alerte.message}</div>
+                  <div className="text-xs text-gray-500 mt-1">{new Date(alerte.date).toLocaleString()}</div>
                 </div>
-                <button className="text-green-600" onClick={() => handleResolveAlerte(alerte._id)}>Résolue</button>
-                <button className="text-red-600" onClick={async () => { await fetch(`/api/alertes/${alerte._id}`, { method: "DELETE" }); mutate("/api/alertes"); setToast({ type: "success", message: "Alerte supprimée" }); }}>Supprimer</button>
+                <div className="flex gap-2">
+                  <button className="flex-1 sm:flex-none px-3 py-1.5 bg-white text-green-700 border border-green-200 hover:bg-green-50 rounded-lg text-xs font-semibold transition-colors shadow-sm" onClick={() => handleResolveAlerte(alerte._id)}>Résolue</button>
+                  <button className="flex-1 sm:flex-none px-3 py-1.5 bg-white text-red-700 border border-red-200 hover:bg-red-50 rounded-lg text-xs font-semibold transition-colors shadow-sm" onClick={async () => { await fetch(`/api/alertes/${alerte._id}`, { method: "DELETE" }); mutate("/api/alertes"); setToast({ type: "success", message: "Alerte supprimée" }); }}>Supprimer</button>
+                </div>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="p-6 bg-white shadow-sm mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <Database className="w-6 h-6 text-cyan-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Mesures</h3>
-            <button className="ml-auto bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm" onClick={exportMesuresCSV}>Exporter CSV</button>
+        <Card className="p-4 sm:p-5 lg:p-6 bg-white shadow-md border border-gray-100 rounded-2xl mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <Database className="w-6 h-6 text-cyan-600" />
+              <h3 className="text-lg font-bold text-gray-900">Mesures</h3>
+            </div>
+            <button className="bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm" onClick={exportMesuresCSV}>Exporter CSV</button>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="bg-slate-100">
-                  <th className="p-2 text-left">Date</th>
-                  <th className="p-2 text-left">Paramètre</th>
-                  <th className="p-2 text-left">Valeur</th>
-                  <th className="p-2 text-left">Bassin</th>
+                <tr className="bg-gray-50 border-y border-gray-100 text-gray-600 font-semibold">
+                  <th className="p-3 text-left whitespace-nowrap">Date</th>
+                  <th className="p-3 text-left whitespace-nowrap">Paramètre</th>
+                  <th className="p-3 text-left whitespace-nowrap">Valeur</th>
+                  <th className="p-3 text-left whitespace-nowrap">Bassin</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-100">
                 {(() => {
                   if (!mesures || !Array.isArray(mesures)) return null;
                   // Trie par date décroissante
@@ -1222,11 +1230,11 @@ export default function AdminDashboard() {
                         else bassinNom = bassinId;
                       }
                       return (
-                        <tr key={param + '-' + i} className="border-b">
-                          <td className="p-2">{new Date(m.date).toLocaleString()}</td>
-                          <td className="p-2">{param}</td>
-                          <td className="p-2">{value}</td>
-                          <td className="p-2">{bassinNom}</td>
+                        <tr key={param + '-' + i} className="hover:bg-gray-50/50 transition-colors text-gray-700">
+                          <td className="p-3 whitespace-nowrap text-xs sm:text-sm">{new Date(m.date).toLocaleString()}</td>
+                          <td className="p-3 whitespace-nowrap text-xs sm:text-sm font-medium">{param}</td>
+                          <td className="p-3 whitespace-nowrap text-xs sm:text-sm font-semibold">{value}</td>
+                          <td className="p-3 whitespace-nowrap text-xs sm:text-sm"><span className="px-2 py-1 bg-gray-100 rounded text-gray-900 font-medium">{bassinNom}</span></td>
                         </tr>
                       );
                     })
@@ -1238,50 +1246,62 @@ export default function AdminDashboard() {
         </Card>
 
         {showAddBassin && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-md relative">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8 w-full max-w-md relative">
               <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
                 onClick={() => setShowAddBassin(false)}
               >
                 <X className="w-5 h-5" />
               </button>
-              <h2 className="text-xl font-bold mb-4">Ajouter un bassin</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-cyan-600" />
+                Ajouter un bassin
+              </h2>
               <form onSubmit={handleAddBassin} className="flex flex-col gap-4">
                 <input
                   type="text"
                   placeholder="Nom du bassin"
-                  className="border rounded-lg px-4 py-2"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                   value={newBassin.nom}
-                  onChange={e => setNewBassin({ ...newBassin, nom: e.target.value })}
+                  onChange={e => setNewUser({ ...newBassin, nom: e.target.value } as any)}
                   required
                 />
                 <input
                   type="text"
                   placeholder="Stade du bassin"
-                  className="border rounded-lg px-4 py-2"
+                  className="bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                   value={newBassin.stade}
                   onChange={e => setNewBassin({ ...newBassin, stade: e.target.value })}
                   required
                 />
-                <button
-                  type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm"
-                  disabled={addingBassin}
-                >
-                  {addingBassin ? "Ajout en cours..." : "Ajouter"}
-                </button>
+                <div className="flex gap-3 mt-4">
+                  <button
+                    type="button"
+                    className="flex-1 py-2.5 bg-gray-100 rounded-lg font-semibold text-gray-700 hover:bg-gray-200 transition-all text-sm"
+                    onClick={() => setShowAddBassin(false)}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-cyan-600 rounded-lg font-semibold text-white hover:bg-cyan-700 transition-all text-sm flex justify-center items-center shadow-md"
+                    disabled={addingBassin}
+                  >
+                    {addingBassin ? "Ajout en cours..." : "Ajouter"}
+                  </button>
+                </div>
               </form>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="p-6 bg-white shadow-sm">
-            <div className="flex items-center gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Évolution de la température</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mx-3 sm:mx-4 md:mx-6 lg:mx-8">
+          <Card className="p-4 sm:p-6 bg-white shadow-md border border-gray-100 rounded-2xl">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Évolution de la température</h3>
               <select
-                className="ml-auto border rounded px-2 py-1"
+                className="bg-white border border-gray-300 rounded-lg px-3 py-1.5 text-sm text-gray-900 focus:ring-2 focus:ring-cyan-500 outline-none"
                 value={selectedBassinChart}
                 onChange={e => setSelectedBassinChart(e.target.value)}
               >
@@ -1290,7 +1310,7 @@ export default function AdminDashboard() {
                 ))}
               </select>
             </div>
-            <div className="mb-2 text-sm text-gray-500">
+            <div className="mb-4 text-sm text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100 inline-block">
               Bassin sélectionné : <span className="font-semibold text-cyan-700">{bassinOptions.find((b: any) => b.id === selectedBassinChart)?.nom || '-'}</span>
             </div>
             <ResponsiveContainer width="100%" height={300}>
@@ -1318,8 +1338,8 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </Card>
 
-          <Card className="p-6 bg-white shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition des alertes</h3>
+          <Card className="p-4 sm:p-6 bg-white shadow-md border border-gray-100 rounded-2xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Répartition des alertes</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -1349,21 +1369,21 @@ export default function AdminDashboard() {
               {alertesParType.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                  <span className="text-sm text-gray-600">{item.name}: {item.value}</span>
+                  <span className="text-sm text-muted-foreground">{item.name}: {item.value}</span>
                 </div>
               ))}
             </div>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6 bg-white shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Dernières mesures</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mx-3 sm:mx-4 md:mx-6 lg:mx-8 mb-8">
+          <Card className="p-4 sm:p-6 bg-white shadow-md border border-gray-100 rounded-2xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Dernières mesures</h3>
             <div className="space-y-3">
               {derniereMesures.map((mesure: any, index: number) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={index} className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 border border-gray-100 rounded-xl hover:shadow-sm transition-shadow">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-white shadow-sm border border-gray-200 rounded-lg flex items-center justify-center text-lg">
                       {mesure.param === "Température" && "🌡️"}
                       {mesure.param === "pH" && "🧪"}
                       {mesure.param === "Oxygène dissous" && "💧"}
@@ -1371,29 +1391,29 @@ export default function AdminDashboard() {
                       {mesure.param === "Turbidité" && "🌫️"}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{mesure.param}</p>
-                      <p className="text-sm text-gray-500">{new Date(mesure.date).toLocaleString()}</p>
+                      <p className="font-bold text-gray-900 text-sm">{mesure.param}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{new Date(mesure.date).toLocaleString()}</p>
                     </div>
                   </div>
-                  <span className="font-semibold text-gray-900">{mesure.value}</span>
+                  <span className="font-extrabold text-cyan-600 bg-cyan-50 px-3 py-1 rounded-lg border border-cyan-100">{mesure.value}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card className="p-6 bg-white shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Alertes récentes</h3>
+          <Card className="p-4 sm:p-6 bg-white shadow-md border border-gray-100 rounded-2xl">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Alertes récentes</h3>
             <div className="space-y-3">
               {alertesArray.slice(0, 5).map((alerte: any, index: number) => (
-                <div key={index} className={`p-3 rounded-lg border-l-4 ${
+                <div key={index} className={`p-4 rounded-xl border-l-4 shadow-sm ${
                   alerte.type === 'error' ? 'bg-red-50 border-red-500' :
                   alerte.type === 'warning' ? 'bg-yellow-50 border-yellow-500' :
                   'bg-blue-50 border-blue-500'
                 }`}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{alerte.message}</p>
-                      <p className="text-sm text-gray-500 mt-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 pr-2">
+                      <p className="font-semibold text-gray-900 text-sm">{alerte.message}</p>
+                      <p className="text-xs text-gray-500 mt-1">
                         {new Date(alerte.date).toLocaleString()}
                       </p>
                     </div>
@@ -1414,8 +1434,8 @@ export default function AdminDashboard() {
 
       {/* Modal Détails du Bassin */}
       {showBassinDetails && selectedBassinForModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
               onClick={() => setShowBassinDetails(false)}
@@ -1429,22 +1449,22 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Informations générales */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Informations générales</h3>
+                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Informations générales</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Nom:</span>
+                    <span className="text-muted-foreground">Nom:</span>
                     <span className="font-medium">{selectedBassinForModal.nom || selectedBassinForModal.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Stade:</span>
+                    <span className="text-muted-foreground">Stade:</span>
                     <span className="font-medium">{selectedBassinForModal.stade || 'Non défini'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">ID:</span>
+                    <span className="text-muted-foreground">ID:</span>
                     <span className="font-mono text-sm">{selectedBassinForModal._id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Statut IoT:</span>
+                    <span className="text-muted-foreground">Statut IoT:</span>
                     <span className={`font-medium ${getBassinIoTStatus(selectedBassinForModal._id).connected ? 'text-green-600' : 'text-red-600'}`}>
                       {getBassinIoTStatus(selectedBassinForModal._id).connected ? 'Connecté' : 'Déconnecté'}
                     </span>
@@ -1454,7 +1474,7 @@ export default function AdminDashboard() {
 
               {/* Dernière mesure */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Dernière mesure</h3>
+                <h3 className="text-lg font-semibold text-foreground border-b pb-2">Dernière mesure</h3>
                 {(() => {
                   const bassinMesures = Array.isArray(mesures) ? mesures.filter((m: any) => (m.bassinId || m.bassin) === selectedBassinForModal._id) : [];
                   const derniereMesure = bassinMesures.length > 0 ? bassinMesures.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())[0] : null;
@@ -1466,27 +1486,27 @@ export default function AdminDashboard() {
                   return (
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Date:</span>
+                        <span className="text-muted-foreground">Date:</span>
                         <span className="font-medium">{new Date(derniereMesure.date).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Température:</span>
+                        <span className="text-muted-foreground">Température:</span>
                         <span className="font-medium">{derniereMesure.temperature || 'N/A'}°C</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">pH:</span>
+                        <span className="text-muted-foreground">pH:</span>
                         <span className="font-medium">{derniereMesure.ph || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Oxygène:</span>
+                        <span className="text-muted-foreground">Oxygène:</span>
                         <span className="font-medium">{derniereMesure.oxygen || 'N/A'} mg/L</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Salinité:</span>
+                        <span className="text-muted-foreground">Salinité:</span>
                         <span className="font-medium">{derniereMesure.salinity || 'N/A'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Turbidité:</span>
+                        <span className="text-muted-foreground">Turbidité:</span>
                         <span className="font-medium">{derniereMesure.turbidity || 'N/A'}</span>
                       </div>
                     </div>
@@ -1497,7 +1517,7 @@ export default function AdminDashboard() {
 
             {/* Statistiques */}
             <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Statistiques</h3>
+              <h3 className="text-lg font-semibold text-foreground border-b pb-2 mb-4">Statistiques</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {(() => {
                   const bassinMesures = Array.isArray(mesures) ? mesures.filter((m: any) => (m.bassinId || m.bassin) === selectedBassinForModal._id) : [];
@@ -1507,27 +1527,27 @@ export default function AdminDashboard() {
                   
                   return (
                     <>
-                      <div className="bg-blue-50 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-blue-600">{bassinMesures.length}</div>
-                        <div className="text-sm text-gray-600">Mesures totales</div>
+                      <div className="bg-primary/10 p-4 rounded-lg text-center border border-primary/20">
+                        <div className="text-2xl font-bold text-primary">{bassinMesures.length}</div>
+                        <div className="text-sm text-muted-foreground">Mesures totales</div>
                       </div>
-                      <div className="bg-green-50 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-green-600">
+                      <div className="bg-emerald-500/10 p-4 rounded-lg text-center border border-emerald-500/20">
+                        <div className="text-2xl font-bold text-emerald-500">
                           {temperatures.length > 0 ? (temperatures.reduce((a, b) => a + b, 0) / temperatures.length).toFixed(1) : 'N/A'}
                         </div>
-                        <div className="text-sm text-gray-600">Temp. moyenne</div>
+                        <div className="text-sm text-muted-foreground">Temp. moyenne</div>
                       </div>
-                      <div className="bg-yellow-50 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-yellow-600">
+                      <div className="bg-purple-500/10 p-4 rounded-lg text-center border border-purple-500/20">
+                        <div className="text-2xl font-bold text-purple-500">
                           {phs.length > 0 ? (phs.reduce((a, b) => a + b, 0) / phs.length).toFixed(2) : 'N/A'}
                         </div>
-                        <div className="text-sm text-gray-600">pH moyen</div>
+                        <div className="text-sm text-muted-foreground">pH moyen</div>
                       </div>
-                      <div className="bg-purple-50 p-4 rounded-lg text-center">
-                        <div className="text-2xl font-bold text-purple-600">
+                      <div className="bg-indigo-500/10 p-4 rounded-lg text-center border border-indigo-500/20">
+                        <div className="text-2xl font-bold text-indigo-500">
                           {oxygens.length > 0 ? (oxygens.reduce((a, b) => a + b, 0) / oxygens.length).toFixed(1) : 'N/A'}
                         </div>
-                        <div className="text-sm text-gray-600">Oxygène moyen</div>
+                        <div className="text-sm text-muted-foreground">Oxygène moyen</div>
                       </div>
                     </>
                   );
@@ -1540,15 +1560,15 @@ export default function AdminDashboard() {
 
       {/* Modal Historique du Bassin */}
       {showBassinHistory && selectedBassinForModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-6xl h-[90vh] flex flex-col relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-xl shadow-2xl p-8 w-full max-w-6xl h-[90vh] flex flex-col relative text-foreground">
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
               onClick={() => setShowBassinHistory(false)}
             >
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-bold mb-6 text-gray-900">
+            <h2 className="text-xl font-bold mb-6 text-foreground">
               Historique du Bassin: {selectedBassinForModal.nom || selectedBassinForModal.name}
             </h2>
             
@@ -1559,11 +1579,11 @@ export default function AdminDashboard() {
               if (mesuresTriees.length === 0) {
                 return (
                   <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
                       <span className="text-2xl">📊</span>
                     </div>
                     <h4 className="text-lg font-medium text-gray-900 mb-2">Aucun historique disponible</h4>
-                    <p className="text-gray-600">Aucune mesure n'a été enregistrée pour ce bassin</p>
+                    <p className="text-muted-foreground">Aucune mesure n'a été enregistrée pour ce bassin</p>
                   </div>
                 );
               }
@@ -1618,15 +1638,15 @@ export default function AdminDashboard() {
               return (
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Graphique avec filtre */}
-                  <div className="bg-gray-50 p-6 rounded-lg mb-6">
+                  <div className="bg-background/50 border border-border p-6 rounded-lg mb-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800">
+                      <h3 className="text-lg font-semibold text-foreground">
                         Évolution du paramètre
                       </h3>
                       <select
                         value={selectedGraphParam}
                         onChange={(e) => setSelectedGraphParam(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                        className="px-3 py-2 bg-background border border-border text-foreground rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                       >
                         <option value="temperature">🌡️ Température</option>
                         <option value="ph">🧪 pH</option>
@@ -1674,27 +1694,27 @@ export default function AdminDashboard() {
                   {/* Tableau des mesures avec pagination */}
                   <div className="flex-1 flex flex-col overflow-hidden min-h-0">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800">Mesures ({mesuresTriees.length} total)</h3>
-                      <div className="text-sm text-gray-600">
+                      <h3 className="text-lg font-semibold text-foreground">Mesures ({mesuresTriees.length} total)</h3>
+                      <div className="text-sm text-muted-foreground">
                         Page {currentPage} sur {totalPages}
                       </div>
                     </div>
                     
                     <div className="flex-1 overflow-y-auto min-h-0">
                       <table className="w-full text-sm">
-                        <thead className="bg-slate-100 sticky top-0 z-10">
+                        <thead className="bg-muted/50 sticky top-0 z-10">
                           <tr>
-                            <th className="p-3 text-left">Date</th>
-                            <th className="p-3 text-left">Température</th>
-                            <th className="p-3 text-left">pH</th>
-                            <th className="p-3 text-left">Oxygène</th>
-                            <th className="p-3 text-left">Salinité</th>
-                            <th className="p-3 text-left">Turbidité</th>
+                            <th className="p-3 text-left border-b border-border">Date</th>
+                            <th className="p-3 text-left border-b border-border">Température</th>
+                            <th className="p-3 text-left border-b border-border">pH</th>
+                            <th className="p-3 text-left border-b border-border">Oxygène</th>
+                            <th className="p-3 text-left border-b border-border">Salinité</th>
+                            <th className="p-3 text-left border-b border-border">Turbidité</th>
                           </tr>
                         </thead>
                         <tbody>
                           {currentMesures.map((mesure: any, index: number) => (
-                            <tr key={startIndex + index} className="border-b hover:bg-gray-50">
+                            <tr key={startIndex + index} className="border-b hover:bg-accent/50">
                               <td className="p-3 whitespace-nowrap">
                                 {new Date(mesure.date).toLocaleString()}
                               </td>
@@ -1721,15 +1741,15 @@ export default function AdminDashboard() {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                        <div className="text-sm text-gray-600">
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                        <div className="text-sm text-muted-foreground">
                           Affichage de {startIndex + 1} à {Math.min(endIndex, mesuresTriees.length)} sur {mesuresTriees.length} mesures
                         </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent/50"
                           >
                             Précédent
                           </button>
@@ -1755,7 +1775,7 @@ export default function AdminDashboard() {
                                   className={`px-3 py-1 text-sm rounded-lg ${
                                     currentPage === pageNum
                                       ? 'bg-cyan-600 text-white'
-                                      : 'border hover:bg-gray-50'
+                                      : 'border hover:bg-accent/50'
                                   }`}
                                 >
                                   {pageNum}
@@ -1767,7 +1787,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
-                            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                            className="px-3 py-1 text-sm border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent/50"
                           >
                             Suivant
                           </button>

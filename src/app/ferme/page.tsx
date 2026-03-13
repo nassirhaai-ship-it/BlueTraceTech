@@ -149,7 +149,8 @@ export default function Ferme() {
 
   // Edition bassin
   function openEditBassin(bassin: any) {
-    setEditBassin({ ...bassin, especes: bassin.especes.join(", "), stade: bassin.stade || "" });
+    const especesStr = bassin.especes && Array.isArray(bassin.especes) ? bassin.especes.join(", ") : "";
+    setEditBassin({ ...bassin, especes: especesStr, stade: bassin.stade || "" });
     setShowEditBassin(bassin._id);
   }
   async function handleEditBassin(e: React.FormEvent) {
@@ -389,7 +390,7 @@ export default function Ferme() {
                       </div>
                     </td>
                     <td className="p-2">{bassin.capacite} L</td>
-                    <td className="p-2">{bassin.especes.join(", ")}</td>
+                    <td className="p-2">{bassin.especes && Array.isArray(bassin.especes) ? bassin.especes.join(", ") : "-"}</td>
                     <td className="p-2">{bassin.stade || "-"}</td>
                     <td className="p-2">
                       <button 

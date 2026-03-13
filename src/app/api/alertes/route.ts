@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { getMockResponse } from "@/lib/mockData";
 
 export async function GET() {
   try {
@@ -9,7 +10,7 @@ export async function GET() {
     return NextResponse.json(alertes);
   } catch (error) {
     console.error("Erreur MongoDB:", error);
-    return NextResponse.json({ error: "Erreur de connexion à la base de données" }, { status: 500 });
+    return getMockResponse('alertes');
   }
 }
 

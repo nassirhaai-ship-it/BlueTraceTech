@@ -7,12 +7,12 @@ export async function GET() {
     const client = await clientPromise;
     const db = client.db();
     const ferme = await db.collection('ferme').findOne({});
-    
+
     if (!ferme) {
       // Si aucune ferme n'existe, retourner une ferme par défaut
-      return NextResponse.json({ nom: "Ferme AquaAI", localisation: "Bretagne" });
+      return NextResponse.json({ nom: "Ferme BlueTrace Tech", localisation: "Bretagne" });
     }
-    
+
     // Ne pas retourner l'_id MongoDB
     const { _id, ...fermeData } = ferme;
     return NextResponse.json(fermeData);
@@ -28,10 +28,10 @@ export async function PUT(req: NextRequest) {
     const data = await req.json();
     const client = await clientPromise;
     const db = client.db();
-    
+
     // Chercher si une ferme existe déjà
     const existingFerme = await db.collection('ferme').findOne({});
-    
+
     if (existingFerme) {
       // Mettre à jour la ferme existante
       await db.collection('ferme').updateOne(
@@ -53,7 +53,7 @@ export async function PUT(req: NextRequest) {
         updatedAt: new Date()
       });
     }
-    
+
     return NextResponse.json({ success: true, message: "Ferme modifiée avec succès" });
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la ferme:", error);

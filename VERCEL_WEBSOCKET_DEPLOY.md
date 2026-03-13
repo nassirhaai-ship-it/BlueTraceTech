@@ -376,3 +376,15 @@ const server = http.createServer((req, res) => {
 
 **Conclusion** : Pour déployer un serveur WebSocket avec Vercel, la meilleure solution est de déployer le serveur WebSocket sur Railway (ou un service similaire) et de le connecter à votre application Next.js sur Vercel via des variables d'environnement.
 
+---
+
+## 📖 Guide Pratique Rapide
+
+Pour un guide pas-à-pas détaillé, consultez : **[DEPLOY_WEBSOCKET_VERCEL.md](./DEPLOY_WEBSOCKET_VERCEL.md)**
+
+Ce guide contient :
+- ✅ Étapes détaillées pour Railway
+- ✅ Configuration des variables d'environnement
+- ✅ Tests et troubleshooting
+- ✅ Checklist complète
+
