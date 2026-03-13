@@ -1,0 +1,28 @@
+node_modules
+.next
+.git
+.env*
+*- Copie*
+* - Copie*
+README.md
+Dockerfile
+docker-compose.yml
+.vercel
+.railwayignore
+.vercelignore
+Procfile
+RAILWAY_DEPLOY.md
+VERCEL_WEBSOCKET_DEPLOY.md
+DEPLOY_WEBSOCKET_VERCEL.md
+*.png
+*.ino
+*.mjs
+*.js
+tsconfig.json
+eslint.config.mjs
+postcss.config.mjs
+next.config.ts
+components.json
+railway.json
+railway-websocket.json
+vercel.json

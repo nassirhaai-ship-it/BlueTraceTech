@@ -3,13 +3,13 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy package files
-COPY aquaai/package.json aquaai/package-lock.json ./
+COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm ci
 
 # Copy the rest of the application
-COPY aquaai/ ./
+COPY . .
 
 # Build the Next.js application
 RUN npm run build
@@ -23,4 +23,4 @@ ENV WS_PORT=4001
 ENV API_BASE_URL=http://localhost:3000
 
 # Start both Next.js and WebSocket server
-CMD ["npm", "run", "dev"] 
+CMD ["npm", "start"] 
