@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
+import fs from 'fs';
+
+export const dynamic = "force-dynamic";
 
 // GET /api/lots - Récupérer tous les lots
 export async function GET(req: NextRequest) {
+  const logPath = 'D:/aquaAi/aquaai/api-error.log';
   try {
+    fs.appendFileSync(logPath, `${new Date().toISOString()} - [GET /api/lots] Handler Start\n`);
     const session = await getServerSession(authOptions);
+    const uri = (process.env.MONGO_URL || process.env.MONGODB_URI);
+    const debugMsg = `${new Date().toISOString()} - [DEBUG] NODE_ENV: ${process.env.NODE_ENV}, URI found: ${uri ? "YES" : "NO"}\n`;
+    fs.appendFileSync(logPath, debugMsg);
     
     if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
@@ -56,10 +64,14 @@ export async function GET(req: NextRequest) {
       .toArray();
     
     return NextResponse.json(lots);
-  } catch (error) {
+  } catch (error: any) {
+    const errorLog = `${new Date().toISOString()} - Error: ${error.message}\nStack: ${error.stack}\n`;
+    try {
+      fs.appendFileSync('D:/aquaAi/aquaai/api-error.log', errorLog);
+    } catch (e) {}
     console.error("Erreur lors de la récupération des lots:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des lots" },
+      { error: "Erreur lors de la récupération des lots", details: error.message },
       { status: 500 }
     );
   }

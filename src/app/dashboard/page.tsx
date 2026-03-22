@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
-import ObservateurDashboard from "@/components/dashboard/ObservateurDashboard";
 import OperateurDashboard from "@/components/dashboard/OperateurDashboard";
+import DistributeurDashboard from "@/components/dashboard/DistributeurDashboard";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -37,8 +37,8 @@ export default function DashboardPage() {
 
   // Afficher le dashboard approprié selon le rôle
   switch (session.user?.role) {
-    case "observateur":
-      return <ObservateurDashboard />;
+    case "distributeur":
+      return <DistributeurDashboard />;
     case "operateur":
       return <OperateurDashboard />;
     case "admin":

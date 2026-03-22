@@ -423,7 +423,7 @@ export default function AdminDashboard() {
   const usersByRole = {
     admin: utilisateurs.filter((u: any) => u.role === "admin").length,
     operateur: utilisateurs.filter((u: any) => u.role === "operateur").length,
-    observateur: utilisateurs.filter((u: any) => u.role === "observateur").length,
+    distributeur: utilisateurs.filter((u: any) => u.role === "distributeur").length,
   };
 
   async function handleAddBassin(e: React.FormEvent) {
@@ -1012,7 +1012,7 @@ export default function AdminDashboard() {
                         <select className="border rounded px-2 py-1 text-xs sm:text-sm w-full" value={editUser.role} onChange={e => setEditUser({ ...editUser, role: e.target.value })}>
                           <option value="admin">Admin</option>
                           <option value="operateur">Opérateur</option>
-                          <option value="observateur">Observateur</option>
+                          <option value="distributeur">Distributeur</option>
                         </select>
                       ) : (
                         <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">{user.role}</span>
@@ -1113,7 +1113,7 @@ export default function AdminDashboard() {
                 >
                   <option value="admin">Administrateur</option>
                   <option value="operateur">Opérateur</option>
-                  <option value="observateur">Observateur</option>
+                  <option value="distributeur">Distributeur</option>
                 </select>
                 <div className="flex gap-3 mt-4">
                   <button

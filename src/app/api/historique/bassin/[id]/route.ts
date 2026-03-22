@@ -14,11 +14,11 @@ import { ObjectId } from "mongodb";
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { searchParams } = new URL(req.url);
-    const bassinId = params.id;
+    const { id: bassinId } = await params;
     
     // Paramètres optionnels
     const startDateParam = searchParams.get('startDate');

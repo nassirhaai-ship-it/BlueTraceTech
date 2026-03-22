@@ -13,7 +13,8 @@ import {
   Cpu,
   FileText,
   Database,
-  BarChart3
+  BarChart3,
+  ShoppingCart
 } from "lucide-react";
 
 interface SidebarProps {
@@ -30,7 +31,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   const isAdmin = session?.user?.role === "admin";
   const isOperateur = session?.user?.role === "operateur";
-  const isObservateur = session?.user?.role === "observateur";
+  const isDistributeur = session?.user?.role === "distributeur";
 
   const handleLinkClick = () => {
     if (onClose) onClose();
@@ -41,7 +42,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       <div className="mb-8 px-2">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 flex items-center justify-center transition-transform duration-300 hover:scale-110">
-            <img src="/icon-bluetrace.png" alt="Icon" className="w-full h-full object-contain" />
+            <img src="/logo-bluetrace.png" alt="BlueTrace Tech" className="w-full h-full object-contain rounded-full" />
           </div>
           <h1 className="text-xl font-black text-foreground uppercase tracking-tight">BlueTrace</h1>
         </div>
@@ -82,8 +83,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </li>
           )}
 
-          {/* Lots - Admin et Opérateur uniquement */}
-          {(isAdmin || isOperateur) && (
+          {/* Lots - Admin, Opérateur et Distributeur */}
+          {(isAdmin || isOperateur || isDistributeur) && (
             <li>
               <Link
                 href="/lots"
@@ -95,6 +96,23 @@ export default function Sidebar({ onClose }: SidebarProps) {
               >
                 <FileText size={20} />
                 <span>Lots</span>
+              </Link>
+            </li>
+          )}
+
+          {/* Ventes - Admin et Distributeur */}
+          {(isAdmin || isDistributeur) && (
+            <li>
+              <Link
+                href="/ventes"
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive("/ventes")
+                    ? "bg-accent text-accent-foreground font-bold"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                  }`}
+              >
+                <ShoppingCart size={20} />
+                <span>Ventes</span>
               </Link>
             </li>
           )}
@@ -116,20 +134,22 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </li>
           )}
 
-          {/* Alertes - Tous les rôles */}
-          <li>
-            <Link
-              href="/alertes"
-              onClick={handleLinkClick}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive("/alertes")
-                  ? "bg-accent text-accent-foreground font-bold"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
-                }`}
-            >
-              <Bell size={20} />
-              <span>Alertes</span>
-            </Link>
-          </li>
+          {/* Alertes - Admin et Opérateur uniquement (alertes techniques) */}
+          {(isAdmin || isOperateur) && (
+            <li>
+              <Link
+                href="/alertes"
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive("/alertes")
+                    ? "bg-accent text-accent-foreground font-bold"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                  }`}
+              >
+                <Bell size={20} />
+                <span>Alertes</span>
+              </Link>
+            </li>
+          )}
 
           {/* Historique - Tous les rôles */}
           <li>
@@ -146,20 +166,22 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
           </li>
 
-          {/* IoT - Tous les rôles */}
-          <li>
-            <Link
-              href="/iot"
-              onClick={handleLinkClick}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive("/iot")
-                  ? "bg-accent text-accent-foreground font-bold"
-                  : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
-                }`}
-            >
-              <Cpu size={20} />
-              <span>Appareils IoT</span>
-            </Link>
-          </li>
+          {/* IoT - Admin et Opérateur uniquement */}
+          {(isAdmin || isOperateur) && (
+            <li>
+              <Link
+                href="/iot"
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive("/iot")
+                    ? "bg-accent text-accent-foreground font-bold"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground"
+                  }`}
+              >
+                <Cpu size={20} />
+                <span>Appareils IoT</span>
+              </Link>
+            </li>
+          )}
 
           {/* Rapports - Tous les rôles */}
           <li>

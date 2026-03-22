@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const body = await req.json();
   const client = await clientPromise;
   const db = client.db();
-  await db.collection('bassins').updateOne({ _id: new ObjectId(params.id) }, { $set: body });
+  await db.collection('bassins').updateOne({ _id: new ObjectId(id) }, { $set: body });
   return NextResponse.json({ success: true });
 }
 

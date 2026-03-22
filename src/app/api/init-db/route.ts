@@ -19,8 +19,8 @@ export async function POST() {
           defaultPassword = "admin";
         } else if (user.email === "operateur@aqua.com") {
           defaultPassword = "operateur";
-        } else if (user.email === "observateur@aqua.com") {
-          defaultPassword = "observateur";
+        } else if (user.email === "distributeur@aqua.com") {
+          defaultPassword = "distributeur";
         } else {
           defaultPassword = "password123"; // Mot de passe par défaut
         }

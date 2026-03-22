@@ -31,8 +31,8 @@ interface Bassin {
 export default function LotsPage() {
   const { data: session } = useSession();
   
-  // Protection accès : seuls admin et opérateur peuvent accéder
-  if (session && session.user?.role !== "admin" && session.user?.role !== "operateur") {
+  // Protection accès : seuls admin, opérateur et distributeur peuvent accéder
+  if (session && !["admin", "operateur", "distributeur"].includes(session.user?.role || "")) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -494,12 +494,14 @@ export default function LotsPage() {
                     }} 
               />
                 </div>
-              <button 
-                  className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
-                onClick={() => setShowAddModal(true)}
-              >
-                  <Plus className="w-4 h-4" /> Ajouter un lot
-              </button>
+              {session?.user?.role !== "distributeur" && (
+                <button 
+                    className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all"
+                  onClick={() => setShowAddModal(true)}
+                >
+                    <Plus className="w-4 h-4" /> Ajouter un lot
+                </button>
+              )}
             </div>
           </div>
           </div>
@@ -563,26 +565,30 @@ export default function LotsPage() {
                     <td className="p-2 text-gray-600">{formatDate(lot.dateCreation)}</td>
                     <td className="p-2 text-right">
                       <div className="flex justify-end gap-2">
-                      <button 
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 rounded-lg transition-colors"
-                        onClick={() => loadLotForEdit(lot._id)}
-                        disabled={loadingDetail && selectedLot === lot._id}
-                      >
-                        <Edit className="w-4 h-4" /> Modifier
-                      </button>
+                      {session?.user?.role !== "distributeur" && (
+                        <button 
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 rounded-lg transition-colors"
+                          onClick={() => loadLotForEdit(lot._id)}
+                          disabled={loadingDetail && selectedLot === lot._id}
+                        >
+                          <Edit className="w-4 h-4" /> Modifier
+                        </button>
+                      )}
                       <button 
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
                         onClick={() => generateQRCode(lot._id)}
                       >
-                          <QrCode className="w-4 h-4" /> QR
+                          <QrCode className="w-4 h-4" /> Certificat
                       </button>
-                      <button 
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                        onClick={() => setShowDelete(lot)}
-                        disabled={deletingId === lot._id}
-                      >
-                          <Trash className="w-4 h-4" /> {deletingId === lot._id ? "..." : "Supprimer"}
-                      </button>
+                      {session?.user?.role !== "distributeur" && (
+                        <button 
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          onClick={() => setShowDelete(lot)}
+                          disabled={deletingId === lot._id}
+                        >
+                            <Trash className="w-4 h-4" /> {deletingId === lot._id ? "..." : "Supprimer"}
+                        </button>
+                      )}
                       </div>
                     </td>
                   </tr>

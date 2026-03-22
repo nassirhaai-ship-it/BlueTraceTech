@@ -5,13 +5,13 @@ import { ObjectId } from "mongodb";
 // GET /api/lots/public/[id] - Récupérer les détails d'un lot de manière publique (sans authentification)
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const client = await clientPromise;
     const db = client.db();
     
-    const id = params.id;
+    const { id } = await params;
     
     // Vérifier si l'ID est valide
     if (!ObjectId.isValid(id)) {

@@ -17,7 +17,8 @@ import {
   X,
   Activity,
   Database,
-  Shield
+  Shield,
+  ShoppingCart
 } from "lucide-react";
 import Loader, { LoaderIcon } from "@/components/ui/Loader";
 import { useSidebar } from "@/components/contexts/SidebarContext";
@@ -33,7 +34,7 @@ export default function Sidebar() {
   const userRole = session?.user?.role || '';
   const isAdmin = userRole === "admin";
   const isOperateur = userRole === "operateur";
-  const isObservateur = userRole === "observateur";
+  const isDistributeur = userRole === "distributeur";
 
   const navigation = [
     {
@@ -41,21 +42,21 @@ export default function Sidebar() {
       href: "/dashboard",
       icon: LayoutDashboard,
       description: "Vue d'ensemble",
-      roles: ["admin", "operateur", "observateur"]
+      roles: ["admin", "operateur", "distributeur"]
     },
     {
       name: "Historique",
       href: "/historique",
       icon: History,
       description: "Données historiques",
-      roles: ["admin", "operateur", "observateur"]
+      roles: ["admin", "operateur"]
     },
     {
       name: "Alertes",
       href: "/alertes",
       icon: Bell,
       description: "Notifications",
-      roles: ["admin", "operateur", "observateur"]
+      roles: ["admin", "operateur"]
     },
     {
       name: "Gestion ferme",
@@ -69,7 +70,14 @@ export default function Sidebar() {
       href: "/lots",
       icon: Database,
       description: "Traçabilité des lots",
-      roles: ["admin", "operateur"]
+      roles: ["admin", "operateur", "distributeur"]
+    },
+    {
+      name: "Ventes",
+      href: "/ventes",
+      icon: ShoppingCart,
+      description: "Ventes et certificats",
+      roles: ["admin", "distributeur"]
     },
     {
       name: "Utilisateurs",
@@ -83,14 +91,14 @@ export default function Sidebar() {
       href: "/rapports",
       icon: BarChart3,
       description: "Analyses et rapports",
-      roles: ["admin", "operateur", "observateur"]
+      roles: ["admin", "operateur"]
     },
     {
       name: "IoT",
       href: "/iot",
       icon: Activity,
       description: "Connectivité IoT",
-      roles: ["admin", "operateur", "observateur"]
+      roles: ["admin", "operateur"]
     },
     {
       name: "Paramètres",
@@ -105,7 +113,7 @@ export default function Sidebar() {
     switch (role) {
       case 'admin': return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
       case 'operateur': return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
-      case 'observateur': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+      case 'distributeur': return 'text-purple-400 bg-purple-500/10 border-purple-500/20';
       default: return 'text-slate-400 bg-slate-500/10 border-slate-500/20';
     }
   };
@@ -114,7 +122,7 @@ export default function Sidebar() {
     switch (role) {
       case 'admin': return 'Administrateur';
       case 'operateur': return 'Opérateur';
-      case 'observateur': return 'Observateur';
+      case 'distributeur': return 'Distributeur';
       default: return role;
     }
   };
@@ -156,14 +164,13 @@ export default function Sidebar() {
       >
         {/* Logo Section */}
         <div className={`flex items-center h-20 border-b border-border ${isCollapsed ? 'px-2 justify-center' : 'px-4 justify-between'}`}>
-          {!isCollapsed ? (
-            <div className="flex items-center gap-1 transition-transform duration-300 hover:scale-105">
+          {!isCollapsed && (
+            <div className="flex items-center gap-3 transition-transform duration-300 hover:scale-105">
+              <img src="/logo-bluetrace.png" alt="BlueTrace Tech" className="w-10 h-10 object-contain rounded-full" />
               <span className="text-lg font-black tracking-tight uppercase">
                 <span className="text-blue-500">Blue</span><span className="text-foreground">Trace Tech</span>
               </span>
             </div>
-          ) : (
-             <div className="text-lg font-black text-blue-500">B<span className="text-foreground">T</span></div>
           )}
           {/* Bouton toggle collapse - Desktop uniquement */}
           <button

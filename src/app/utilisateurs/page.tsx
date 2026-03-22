@@ -162,7 +162,7 @@ export default function Utilisateurs() {
     switch (role) {
       case "admin": return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-700">Administrateur</span>;
       case "operateur": return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">Opérateur</span>;
-      case "observateur": return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Observateur</span>;
+      case "distributeur": return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">Distributeur</span>;
       default: return <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">{role}</span>;
     }
   };
@@ -179,7 +179,7 @@ export default function Utilisateurs() {
   // Compter les utilisateurs par rôle
   const nbAdmin = utilisateurs.filter(u => u.role === "admin").length;
   const nbOperateur = utilisateurs.filter(u => u.role === "operateur").length;
-  const nbObservateur = utilisateurs.filter(u => u.role === "observateur").length;
+  const nbDistributeur = utilisateurs.filter(u => u.role === "distributeur").length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-2 sm:p-6 md:p-12">
@@ -238,11 +238,11 @@ export default function Utilisateurs() {
           <div className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Observateurs</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{nbObservateur}</p>
-                <p className="text-sm mt-1 text-green-600">Lecture seule</p>
+                <p className="text-sm font-medium text-gray-600">Distributeurs</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">{nbDistributeur}</p>
+                <p className="text-sm mt-1 text-purple-600">Partenaires</p>
               </div>
-              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white">
                 <CheckCircle className="w-6 h-6" />
               </div>
             </div>
@@ -453,7 +453,7 @@ export default function Utilisateurs() {
                 >
                 <option value="admin">Administrateur</option>
                 <option value="operateur">Opérateur</option>
-                <option value="observateur">Observateur</option>
+                <option value="distributeur">Distributeur</option>
               </select>
               </div>
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
@@ -525,7 +525,7 @@ export default function Utilisateurs() {
                 >
                 <option value="admin">Administrateur</option>
                 <option value="operateur">Opérateur</option>
-                <option value="observateur">Observateur</option>
+                <option value="distributeur">Distributeur</option>
               </select>
               </div>
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">

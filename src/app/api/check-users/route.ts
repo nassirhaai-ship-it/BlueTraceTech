@@ -58,10 +58,10 @@ export async function POST() {
         role: "operateur"
       },
       {
-        email: "observateur@aqua.com",
-        name: "Observateur 1",
-        password: "observateur",
-        role: "observateur"
+        email: "distributeur@aqua.com",
+        name: "Distributeur 1",
+        password: "distributeur",
+        role: "distributeur"
       }
     ];
     

@@ -1,0 +1,400 @@
+2026-03-18T02:39:11.583Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:58:27.302Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:58:28.917Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:58:45.468Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:58:57.649Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:00.755Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:04.391Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:07.150Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:09.047Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:11.713Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T12:59:43.292Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:00:04.388Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:02:27.771Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:02:43.956Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:02:44.338Z - [GET /api/lots] Handler Start
+2026-03-22T13:02:44.388Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:02:44.715Z - [GET /api/lots] Handler Start
+2026-03-22T13:02:44.730Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:02:44.941Z - [GET /api/lots] Handler Start
+2026-03-22T13:02:44.951Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:02:45.199Z - [GET /api/lots] Handler Start
+2026-03-22T13:02:45.208Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:02:51.602Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:02:56.968Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:05.461Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:09.751Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:11.146Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:12.821Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:12.831Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:13.085Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:13.095Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:13.832Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:14.292Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:20.890Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:26.693Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:30.016Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:35.486Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:35.496Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:35.694Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:35.702Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:43.346Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:43.355Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:50.619Z - [GET /api/lots] Handler Start
+2026-03-22T13:03:50.625Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:03:51.646Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:03:55.282Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:06:14.735Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:07:51.853Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:08:05.561Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:08:11.596Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:08:12.118Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:08:31.591Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:10:37.394Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:10:46.988Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:10:53.186Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:10:58.540Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:01.467Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:06.512Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:06.665Z - [GET /api/lots] Handler Start
+2026-03-22T13:11:06.688Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:11:06.948Z - [GET /api/lots] Handler Start
+2026-03-22T13:11:06.957Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:11:11.570Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:15.209Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:19.750Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:23.300Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:23.716Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:47.560Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:11:52.804Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:12:08.228Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:12:08.487Z - [GET /api/lots] Handler Start
+2026-03-22T13:12:08.594Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:12:10.921Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:12:11.049Z - [GET /api/lots] Handler Start
+2026-03-22T13:12:11.115Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:12:51.832Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:19:51.909Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:20:24.524Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:20:31.496Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:20:55.156Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:15.861Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:15.902Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:16.167Z - [GET /api/lots] Handler Start
+2026-03-22T13:21:16.257Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:21:36.495Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:38.367Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:42.236Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:21:46.927Z - [GET /api/lots] Handler Start
+2026-03-22T13:21:46.933Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:21:47.623Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:22:06.833Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:22:10.286Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:23:34.675Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:23:46.024Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:23:51.094Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:23:56.902Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:24:08.543Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:24:09.760Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:24:09.945Z - [GET /api/lots] Handler Start
+2026-03-22T13:24:10.008Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:24:11.716Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:24:27.793Z - [GET /api/lots] Handler Start
+2026-03-22T13:24:27.807Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:24:33.434Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:25:52.220Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:02.473Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:03.303Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:11.784Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:12.167Z - [GET /api/lots] Handler Start
+2026-03-22T13:26:12.255Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:26:12.492Z - [GET /api/lots] Handler Start
+2026-03-22T13:26:12.504Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:26:19.989Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:27.846Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:39.982Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:40.440Z - [GET /api/lots] Handler Start
+2026-03-22T13:26:40.486Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:26:40.796Z - [GET /api/lots] Handler Start
+2026-03-22T13:26:40.809Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:26:55.396Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:26:59.163Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:28:10.962Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:28:12.998Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:28:13.044Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:28:13.242Z - [GET /api/lots] Handler Start
+2026-03-22T13:28:13.285Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:28:31.729Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:30:27.679Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:30:28.888Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:30:32.873Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:30:33.034Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:31:16.284Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:31:20.169Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:31:30.637Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:31:31.051Z - [GET /api/lots] Handler Start
+2026-03-22T13:31:31.168Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:32:11.617Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:12.340Z - [GET /api/lots] Handler Start
+2026-03-22T13:32:13.625Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:32:24.007Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:27.698Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:44.762Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:49.659Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:55.394Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:32:58.752Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:33:03.810Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:33:18.951Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:33:19.162Z - [GET /api/lots] Handler Start
+2026-03-22T13:33:19.220Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:07.521Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:34:09.902Z - [GET /api/lots] Handler Start
+2026-03-22T13:34:09.911Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:10.107Z - [GET /api/lots] Handler Start
+2026-03-22T13:34:10.133Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:42.925Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:34:43.639Z - [GET /api/lots] Handler Start
+2026-03-22T13:34:43.642Z - [GET /api/lots] Handler Start
+2026-03-22T13:34:43.856Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:43.863Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:50.512Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:34:52.043Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:34:52.347Z - [GET /api/lots] Handler Start
+2026-03-22T13:34:52.479Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:34:55.345Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:35:03.363Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:35:06.957Z - [GET /api/lots] Handler Start
+2026-03-22T13:35:06.968Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:35:07.184Z - [GET /api/lots] Handler Start
+2026-03-22T13:35:07.196Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:37:52.081Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:37:57.750Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:37:58.199Z - [GET /api/lots] Handler Start
+2026-03-22T13:37:58.299Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:38:01.343Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:39:23.239Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:44:05.151Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:44:17.017Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:44:17.577Z - [GET /api/lots] Handler Start
+2026-03-22T13:44:17.691Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:44:26.545Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:44:35.337Z - [GET /api/lots] Handler Start
+2026-03-22T13:44:35.348Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:44:44.906Z - [GET /api/lots] Handler Start
+2026-03-22T13:44:44.919Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:44:47.632Z - [GET /api/lots] Handler Start
+2026-03-22T13:44:47.643Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:44:47.714Z - Error: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+Stack: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+    at Timeout._onTimeout (D:\aquaAi\aquaai\node_modules\mongodb\lib\sdam\topology.js:278:38)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+2026-03-22T13:44:56.990Z - [GET /api/lots] Handler Start
+2026-03-22T13:44:57.003Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:45:05.354Z - Error: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+Stack: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+    at Timeout._onTimeout (D:\aquaAi\aquaai\node_modules\mongodb\lib\sdam\topology.js:278:38)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+2026-03-22T13:45:14.933Z - Error: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+Stack: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+    at Timeout._onTimeout (D:\aquaAi\aquaai\node_modules\mongodb\lib\sdam\topology.js:278:38)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+2026-03-22T13:45:17.647Z - Error: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+Stack: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+    at Timeout._onTimeout (D:\aquaAi\aquaai\node_modules\mongodb\lib\sdam\topology.js:278:38)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+2026-03-22T13:45:27.465Z - Error: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+Stack: MongoServerSelectionError: getaddrinfo ENOTFOUND ac-5sa1ebx-shard-00-02.p3sd301.mongodb.net
+    at Timeout._onTimeout (D:\aquaAi\aquaai\node_modules\mongodb\lib\sdam\topology.js:278:38)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+2026-03-22T13:47:56.000Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:14.542Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:16.073Z - [GET /api/lots] Handler Start
+2026-03-22T13:50:16.078Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:50:16.391Z - [GET /api/lots] Handler Start
+2026-03-22T13:50:16.396Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:50:32.716Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:34.977Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:39.779Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:41.163Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:50:41.434Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:56:10.466Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:56:21.735Z - [GET /api/lots] Handler Start
+2026-03-22T13:56:21.757Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:56:25.742Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:56:31.130Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:56:31.265Z - [GET /api/lots] Handler Start
+2026-03-22T13:56:31.309Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:56:32.571Z - [GET /api/lots] Handler Start
+2026-03-22T13:56:32.578Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:56:41.518Z - [GET /api/lots] Handler Start
+2026-03-22T13:56:41.530Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:56:44.578Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:56:59.094Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:01.899Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:03.570Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:15.649Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:15.800Z - [GET /api/lots] Handler Start
+2026-03-22T13:57:15.846Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:57:17.663Z - [GET /api/lots] Handler Start
+2026-03-22T13:57:17.676Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:57:17.882Z - [GET /api/lots] Handler Start
+2026-03-22T13:57:17.889Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:57:18.015Z - [GET /api/lots] Handler Start
+2026-03-22T13:57:18.027Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:57:28.269Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:31.087Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:57:56.867Z - [GET /api/lots] Handler Start
+2026-03-22T13:57:56.882Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:01.439Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:58:21.738Z - [GET /api/lots] Handler Start
+2026-03-22T13:58:21.747Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:21.955Z - [GET /api/lots] Handler Start
+2026-03-22T13:58:21.974Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:45.378Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:58:45.382Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:58:49.928Z - [GET /api/lots] Handler Start
+2026-03-22T13:58:49.944Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:53.523Z - [GET /api/lots] Handler Start
+2026-03-22T13:58:53.534Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:53.839Z - [GET /api/lots] Handler Start
+2026-03-22T13:58:53.848Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:58:54.183Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:59:14.648Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:14.657Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:59:15.804Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:15.819Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:59:19.885Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T13:59:29.099Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:29.112Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:59:29.344Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:29.355Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:59:33.287Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:33.298Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T13:59:33.551Z - [GET /api/lots] Handler Start
+2026-03-22T13:59:33.561Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:01:50.363Z - [GET /api/lots] Handler Start
+2026-03-22T14:01:50.372Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:02:01.748Z - [GET /api/lots] Handler Start
+2026-03-22T14:02:01.751Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:03:28.708Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:03:29.013Z - [GET /api/lots] Handler Start
+2026-03-22T14:03:29.145Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:03:31.782Z - [GET /api/lots] Handler Start
+2026-03-22T14:03:31.977Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:03:32.616Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:03:43.816Z - [GET /api/lots] Handler Start
+2026-03-22T14:03:43.841Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:03:46.715Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:04:20.685Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:04:41.258Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:04:47.669Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:04:49.291Z - [GET /api/lots] Handler Start
+2026-03-22T14:04:49.323Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:04:52.071Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:04:57.814Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:05:00.851Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:05:11.124Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:06:37.450Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:06:41.310Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:06:47.424Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:06:48.293Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:06:48.449Z - [GET /api/lots] Handler Start
+2026-03-22T14:06:48.521Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:06:49.060Z - [GET /api/lots] Handler Start
+2026-03-22T14:06:49.123Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:02.396Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:02.406Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:16.737Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:16.756Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:16.978Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:16.990Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:18.178Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:18.189Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:18.684Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:18.693Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:23.721Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:23.734Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:24.805Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:24.817Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:25.004Z - [GET /api/lots] Handler Start
+2026-03-22T14:08:25.016Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T14:08:34.270Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:08:38.891Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:08:42.942Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T14:09:23.028Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:21:55.885Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:22:49.334Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:22:56.287Z - [GET /api/lots] Handler Start
+2026-03-22T15:22:56.295Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:22:56.304Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:23:24.383Z - [GET /api/lots] Handler Start
+2026-03-22T15:23:24.388Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:23:26.917Z - [GET /api/lots] Handler Start
+2026-03-22T15:23:26.921Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:23:27.073Z - [GET /api/lots] Handler Start
+2026-03-22T15:23:27.078Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:23:31.981Z - [GET /api/lots] Handler Start
+2026-03-22T15:23:31.985Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:23:32.195Z - [GET /api/lots] Handler Start
+2026-03-22T15:23:32.199Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:23:52.172Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:23:54.043Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:06.874Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:07.873Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:08.080Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:18.250Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:19.820Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:19.825Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:19.942Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:19.945Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:20.113Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:24:21.497Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:21.501Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:21.617Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:21.623Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:22.252Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:22.255Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:25.914Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:25.918Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:26.045Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:26.050Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:24:37.266Z - [GET /api/lots] Handler Start
+2026-03-22T15:24:37.273Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:26:06.391Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:26:07.168Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:26:14.443Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:26:15.124Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:26:17.547Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:26:17.632Z - [GET /api/lots] Handler Start
+2026-03-22T15:26:17.708Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:26:17.775Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:27:23.837Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:27:25.539Z - [GET /api/lots] Handler Start
+2026-03-22T15:27:25.545Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:27:26.763Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:27:59.966Z - [GET /api/lots] Handler Start
+2026-03-22T15:27:59.984Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:28:05.096Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:30:07.684Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:30:07.798Z - [GET /api/lots] Handler Start
+2026-03-22T15:30:07.798Z - [GET /api/lots] Handler Start
+2026-03-22T15:30:07.820Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:30:07.826Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:30:23.473Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:30:39.035Z - [GET /api/lots] Handler Start
+2026-03-22T15:30:39.069Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:30:43.929Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:30:46.972Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:31:18.653Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:31:18.873Z - [GET /api/lots] Handler Start
+2026-03-22T15:31:19.104Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:31:22.880Z - [MONGODB LIB] URI Configured: YES, Proto: mongodb+sr, NODE_ENV: development
+2026-03-22T15:32:10.851Z - [GET /api/lots] Handler Start
+2026-03-22T15:32:10.858Z - [DEBUG] NODE_ENV: development, URI found: YES
+2026-03-22T15:32:24.919Z - [GET /api/lots] Handler Start
+2026-03-22T15:32:24.925Z - [DEBUG] NODE_ENV: development, URI found: YES

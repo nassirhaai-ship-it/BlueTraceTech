@@ -5,14 +5,15 @@ import bcrypt from "bcryptjs";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const client = await clientPromise;
     const db = client.db();
     
     // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "ID utilisateur invalide" }, { status: 400 });
     }
 
@@ -30,7 +31,7 @@ export async function PUT(
     if (data.actif !== undefined) updateData.actif = data.actif;
 
     const result = await db.collection("users").updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: updateData }
     );
 
@@ -39,7 +40,7 @@ export async function PUT(
     }
 
     // Récupérer l'utilisateur mis à jour
-    const updatedUser = await db.collection("users").findOne({ _id: new ObjectId(params.id) });
+    const updatedUser = await db.collection("users").findOne({ _id: new ObjectId(id) });
 
     return NextResponse.json({ 
       success: true, 
@@ -54,19 +55,20 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const client = await clientPromise;
     const db = client.db();
     
     // Vérifier que l'ID est valide
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "ID utilisateur invalide" }, { status: 400 });
     }
 
     const result = await db.collection("users").deleteOne({ 
-      _id: new ObjectId(params.id) 
+      _id: new ObjectId(id) 
     });
 
     if (result.deletedCount === 0) {
@@ -86,12 +88,13 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const client = await clientPromise;
     const db = client.db();
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "ID utilisateur invalide" }, { status: 400 });
     }
     const { password } = await req.json();
@@ -100,7 +103,7 @@ export async function PATCH(
     }
     const hashed = await bcrypt.hash(password, 10);
     const result = await db.collection("users").updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: { password: hashed, updatedAt: new Date() } }
     );
     if (result.matchedCount === 0) {
@@ -111,4 +114,5 @@ export async function PATCH(
     console.error("Erreur MongoDB:", error);
     return NextResponse.json({ error: "Erreur lors de la réinitialisation du mot de passe" }, { status: 500 });
   }
-} 
+}
+ 

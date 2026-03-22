@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import QRCode from "qrcode";
 
 // GET /api/lots/[id]/qrcode - Générer un QR code pour un lot
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session) {
@@ -21,7 +22,7 @@ export async function GET(
     const db = client.db();
     
     // Vérifier si l'ID est valide
-    if (!ObjectId.isValid(params.id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "ID de lot invalide" },
         { status: 400 }
@@ -31,7 +32,7 @@ export async function GET(
     // Vérifier si le lot existe
     const lot = await db
       .collection("lots")
-      .findOne({ _id: new ObjectId(params.id) });
+      .findOne({ _id: new ObjectId(id) });
     
     if (!lot) {
       return NextResponse.json(
@@ -42,7 +43,7 @@ export async function GET(
     
     // Créer l'URL pour la page de traçabilité publique
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || "http://localhost:3000";
-    const qrCodeUrl = `${baseUrl}/public/tracabilite/${params.id}`;
+    const qrCodeUrl = `${baseUrl}/public/tracabilite/${id}`;
     
     // Générer le QR code
     const qrCodeImage = await QRCode.toDataURL(qrCodeUrl, {
@@ -56,9 +57,18 @@ export async function GET(
     
     // Mettre à jour le statut du QR code dans la base de données
     await db.collection("lots").updateOne(
-      { _id: new ObjectId(params.id) },
+      { _id: new ObjectId(id) },
       { $set: { qrCodeGenere: true } }
     );
+
+    // Si un saleId est fourni, mettre à jour la vente
+    const saleId = req.nextUrl.searchParams.get("saleId");
+    if (saleId && ObjectId.isValid(saleId)) {
+      await db.collection("ventes").updateOne(
+        { _id: new ObjectId(saleId) },
+        { $set: { certificatGenere: true } }
+      );
+    }
     
     return NextResponse.json({
       qrCodeImage,

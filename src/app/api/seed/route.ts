@@ -11,7 +11,7 @@ export async function POST() {
     const usersCollection = db.collection("users");
     const adminPassword = await bcrypt.hash("admin", 10);
     const operateurPassword = await bcrypt.hash("operateur", 10);
-    const observateurPassword = await bcrypt.hash("observateur", 10);
+    const distributeurPassword = await bcrypt.hash("distributeur", 10);
 
     const users = [
       {
@@ -33,10 +33,10 @@ export async function POST() {
         updatedAt: new Date()
       },
       {
-        name: "Observateur 1",
-        email: "observateur@aqua.com",
-        password: observateurPassword,
-        role: "observateur",
+        name: "Distributeur 1",
+        email: "distributeur@aqua.com",
+        password: distributeurPassword,
+        role: "distributeur",
         actif: true,
         createdAt: new Date(),
         updatedAt: new Date()

@@ -26,7 +26,7 @@ if (typeof window === "undefined" || !global.localStorage) {
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import SessionProvider from "@/components/providers/SessionProvider";
 import Sidebar from "@/components/Sidebar";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -76,6 +76,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
 function AppHeader() {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const { isCollapsed } = useSidebar();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -98,10 +99,8 @@ function AppHeader() {
   return (
     <header className="fixed lg:sticky top-0 left-0 right-0 z-40 bg-sidebar border-b border-sidebar-border shadow-md lg:relative transition-colors duration-300">
       <div className="px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center h-16 justify-between">
-        <div className="flex items-center gap-1 group cursor-pointer transition-transform duration-300 hover:scale-105">
-          <span className="hidden sm:block text-xl font-black tracking-tight uppercase">
-            <span className="text-blue-500">Blue</span><span className="text-foreground">Trace Tech</span>
-          </span>
+        <div className="flex items-center gap-4">
+          <img src="/logo-bluetrace.png" alt="BlueTrace Tech Logo" className="h-10 w-auto" />
         </div>
         <div className="flex items-center gap-2 sm:gap-4 justify-end ml-auto">
           <button className="relative p-2 rounded-full hover:bg-white/5 transition focus:outline-none focus:ring-2 focus:ring-cyan-400">
@@ -121,9 +120,11 @@ function AppHeader() {
                 <a href="/profil" className="flex items-center gap-2 px-4 py-2 text-foreground hover:bg-primary/10 hover:text-primary text-sm sm:text-base transition-colors">
                   <User className="w-4 h-4" /> Profil
                 </a>
-                <a href="/parametres" className="flex items-center gap-2 px-4 py-2 text-foreground hover:bg-primary/10 hover:text-primary text-sm sm:text-base transition-colors">
-                  <Settings className="w-4 h-4" /> Paramètres
-                </a>
+                {session?.user?.role === "admin" && (
+                  <a href="/parametres" className="flex items-center gap-2 px-4 py-2 text-foreground hover:bg-primary/10 hover:text-primary text-sm sm:text-base transition-colors">
+                    <Settings className="w-4 h-4" /> Paramètres
+                  </a>
+                )}
                 <div className="my-2 border-t border-border" />
                 <button
                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-red-400 hover:bg-red-500/10 transition-colors text-sm sm:text-base"

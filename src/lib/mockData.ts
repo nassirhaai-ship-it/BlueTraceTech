@@ -15,7 +15,7 @@ const mockAlertes = [
 const mockUtilisateurs = [
   { _id: '1', name: 'Admin Simulé', email: 'admin@bluetrace.com', role: 'admin' },
   { _id: '2', name: 'Opérateur Simulé', email: 'op@bluetrace.com', role: 'operateur' },
-  { _id: '3', name: 'Observateur Simulé', email: 'obs@bluetrace.com', role: 'observateur' },
+  { _id: '3', name: 'Distributeur Simulé', email: 'dist@bluetrace.com', role: 'distributeur' },
 ];
 
 const mockMesures = Array.from({ length: 50 }).map((_, i) => ({

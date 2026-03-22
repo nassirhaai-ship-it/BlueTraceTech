@@ -13,8 +13,7 @@ async function run() {
     const accounts = [
       { email: "admin@trace.com", password: "admin", role: "admin", name: "Admin Démo" },
       { email: "operateur@trace.com", password: "operateur", role: "operateur", name: "Opérateur Démo" },
-      { email: "observateur@trace.com", password: "observateur", role: "observateur", name: "Observateur Démo" },
-      { email: "demo@trace.com", password: "demo", role: "observateur", name: "Compte Démonstration" },
+      { email: "distributeur@trace.com", password: "distributeur", role: "distributeur", name: "Distributeur Démo" },
     ];
 
     for (const acc of accounts) {

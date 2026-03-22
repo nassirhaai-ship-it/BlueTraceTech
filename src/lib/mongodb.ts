@@ -2,6 +2,11 @@ import { MongoClient } from "mongodb";
 
 // Support à la fois MONGO_URL (Railway) et MONGODB_URI (Atlas/autre)
 const uri = (process.env.MONGO_URL || process.env.MONGODB_URI) as string;
+try {
+  const fs = require('fs');
+  const logMsg = `${new Date().toISOString()} - [MONGODB LIB] URI Configured: ${uri ? "YES" : "NO"}, Proto: ${uri ? uri.substring(0, 10) : "N/A"}, NODE_ENV: ${process.env.NODE_ENV}\n`;
+  fs.appendFileSync('D:/aquaAi/aquaai/api-error.log', logMsg);
+} catch (e) {}
 console.log("[MONGODB] URI Configured:", uri ? "YES" : "NO");
 if (uri) console.log("[MONGODB] URI Protocol:", uri.substring(0, 10));
 

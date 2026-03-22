@@ -80,7 +80,10 @@ export default function SignIn() {
       <div className="w-full max-w-md relative z-10">
         {/* Logo et titre */}
         <div className="text-center mb-6 sm:mb-8 transition-transform duration-500 hover:scale-105">
-          <h1 className="text-4xl sm:text-5xl font-black mb-2 tracking-tight uppercase">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-4">
+            <img src="/logo-bluetrace.png" alt="BlueTrace Tech" className="w-full h-full object-contain rounded-full shadow-lg" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black mb-2 tracking-tight uppercase">
             <span className="text-blue-600">Blue</span><span className="text-foreground">Trace Tech</span>
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground font-medium uppercase tracking-[0.2em]">High-Tech Traceability System</p>
@@ -155,7 +158,7 @@ export default function SignIn() {
                 {[
                   { email: "admin@trace.com", password: "admin", role: "Administrateur", color: "from-red-500/20 to-red-600/5 border-red-500/20 text-red-400" },
                   { email: "operateur@trace.com", password: "operateur", role: "Opérateur", color: "from-blue-500/20 to-blue-600/5 border-blue-500/20 text-blue-400" },
-                  { email: "observateur@trace.com", password: "observateur", role: "Observateur", color: "from-green-500/20 to-green-600/5 border-green-500/20 text-green-400" },
+                  { email: "distributeur@trace.com", password: "distributeur", role: "Distributeur", color: "from-purple-500/20 to-purple-600/5 border-purple-500/20 text-purple-400" },
 
                 ].map((demo, index) => (
                   <button

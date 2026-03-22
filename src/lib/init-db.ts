@@ -31,10 +31,10 @@ export async function initializeDatabase() {
           updatedAt: new Date()
         },
         {
-          name: "Observateur 1",
-          email: "observateur@aqua.com",
-          password: await bcrypt.hash("observateur", 10),
-          role: "observateur",
+          name: "Distributeur 1",
+          email: "distributeur@aqua.com",
+          password: await bcrypt.hash("distributeur", 10),
+          role: "distributeur",
           actif: true,
           createdAt: new Date(),
           updatedAt: new Date()

@@ -67,7 +67,8 @@ export default function Home() {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3 bg-background/80 backdrop-blur-xl border-b border-border shadow-2xl' : 'py-6 bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-1 group cursor-pointer transition-transform duration-300 hover:scale-105">
+          <div className="flex items-center gap-3 group cursor-pointer transition-transform duration-300 hover:scale-105">
+            <Image src="/logo-bluetrace.png" alt="BlueTrace Tech" width={48} height={48} className="object-contain rounded-full" priority />
             <span className="text-xl sm:text-2xl font-black tracking-tight uppercase">
               <span className="text-blue-500">Blue</span><span className="text-foreground">Trace Tech</span>
             </span>

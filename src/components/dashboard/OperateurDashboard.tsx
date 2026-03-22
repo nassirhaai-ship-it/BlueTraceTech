@@ -4,11 +4,15 @@ import { Card } from "@/components/ui/card";
 import useSWR from "swr";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 import { useState, useEffect } from "react";
-import { AlertTriangle, CheckCircle, Clock, Activity, Settings, Zap, Eye, TrendingUp, RefreshCw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, Activity, Settings, Zap, Eye, TrendingUp, RefreshCw, ShoppingCart, BadgeCheck } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function OperateurDashboard() {
+  const { data: session } = useSession();
+  const isDistributeur = session?.user?.role === "distributeur";
+  
   const { data: rawMesures, isLoading: mesuresLoading } = useSWR("/api/mesures", fetcher);
   const { data: rawAlertes, isLoading: alertesLoading } = useSWR("/api/alertes", fetcher);
   const { data: rawBassins = [], isLoading: bassinsLoading } = useSWR("/api/bassins", fetcher);
@@ -71,7 +75,9 @@ export default function OperateurDashboard() {
                 <Activity className="w-6 h-6 text-cyan-600" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight uppercase">Dashboard Opérateur</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight uppercase">
+                  {isDistributeur ? "Dashboard Distributeur" : "Dashboard Opérateur"}
+                </h1>
                 <p className="text-xs sm:text-sm text-cyan-700 mt-1 font-semibold font-mono uppercase tracking-wide bg-cyan-50 px-2 py-0.5 rounded border border-cyan-100 inline-block">
                   BlueTrace Tech System
                 </p>
@@ -101,7 +107,25 @@ export default function OperateurDashboard() {
       <div className="p-3 sm:p-4 md:p-6 lg:p-8 relative z-10 w-full max-w-full overflow-x-hidden pt-24 lg:pt-6">
         {/* KPIs Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 lg:mb-10">
-          {[
+          {isDistributeur ? [
+            { title: "Ventes mensuelles", value: "1.2M DZ", icon: <ShoppingCart />, trend: "+12%", color: "from-cyan-500 to-blue-600", colorShadow: "shadow-cyan-500/20" },
+            { title: "Certificats émis", value: "48", icon: <BadgeCheck />, trend: "8 en attente", color: "from-emerald-500 to-teal-600", colorShadow: "shadow-emerald-500/20" },
+            { title: "Lots disponibles", value: rawBassins.length.toString(), icon: <Activity />, trend: "Prêt à la vente", color: "from-blue-500 to-indigo-600", colorShadow: "shadow-blue-500/20" },
+            { title: "Satisfaction", value: "98%", icon: <CheckCircle />, trend: "+2.1%", color: "from-purple-500 to-pink-600", colorShadow: "shadow-purple-500/20" }
+          ].map((kpi, index) => (
+            <div key={index} className="bg-white shadow-md border border-gray-100 rounded-2xl p-4 sm:p-5 lg:p-6 w-full group hover:shadow-lg transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{kpi.title}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{kpi.value}</p>
+                  <p className="text-xs font-bold text-cyan-600 mt-1 uppercase tracking-wider">{kpi.trend}</p>
+                </div>
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${kpi.color} ${kpi.colorShadow} flex items-center justify-center text-white shadow-md`}>
+                  {kpi.icon}
+                </div>
+              </div>
+            </div>
+          )) : [
             { title: "Alertes actives", value: alertesArray.filter((a: any) => a.type === "error").length.toString(), icon: <AlertTriangle />, trend: "À traiter", color: "from-rose-500 to-red-600", colorShadow: "shadow-rose-500/20" },
             { title: "Tâches en cours", value: tachesEnCours.filter(t => t.statut === "en_cours").length.toString(), icon: <Clock />, trend: "3 planifiées", color: "from-blue-500 to-indigo-600", colorShadow: "shadow-blue-500/20" },
             { title: "Systèmes OK", value: "11/12", icon: <CheckCircle />, trend: "1 en maintenance", color: "from-emerald-500 to-teal-600", colorShadow: "shadow-emerald-500/20" },
