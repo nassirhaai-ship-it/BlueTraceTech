@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, use } from "react";
 import Image from "next/image";
 import { jsPDF } from "jspdf";
 import { toPng } from 'html-to-image';
+import QRCode from "react-qr-code";
 import {
   ArrowLeft,
   Fish,
@@ -88,8 +89,12 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
   const [mesuresHistoriques, setMesuresHistoriques] = useState<Mesure[]>([]);
   const certificateRef = useRef<HTMLDivElement>(null);
   const { id: lotId } = use(params);
+  const [qrUrl, setQrUrl] = useState("");
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setQrUrl(window.location.href);
+    }
     const fetchLotData = async () => {
       try {
         const response = await fetch(`/api/lots/public/${lotId}`);
@@ -348,9 +353,19 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
                  <span className="font-bold tracking-[0.3em] uppercase text-[10px] block mt-1" style={{ color: '#0e7490' }}>Écosystème d'Intelligence</span>
                </div>
              </div>
-             <div className="text-right">
-                <span className="font-mono text-[10px] tracking-widest uppercase block mb-1" style={{ color: '#94a3b8' }}>Réf. Document</span>
-                <span className="font-mono text-xs font-bold px-3 py-1 rounded" style={{ backgroundColor: '#f1f5f9', color: '#1e293b' }}>DOC-{lot._id.slice(-6).toUpperCase()}</span>
+             <div className="flex items-center gap-6">
+               <div className="text-right">
+                  <span className="font-mono text-[10px] tracking-widest uppercase block mb-1" style={{ color: '#94a3b8' }}>Réf. Document</span>
+                  <span className="font-mono text-xs font-bold px-3 py-1 rounded block mb-2" style={{ backgroundColor: '#f1f5f9', color: '#1e293b' }}>
+                    DOC-{lot._id.slice(-6).toUpperCase()}
+                  </span>
+                  <span className="font-mono text-[8px] tracking-widest uppercase" style={{ color: '#94a3b8' }}>Scanner pour vérifier</span>
+               </div>
+               {qrUrl && (
+                 <div className="p-2 border rounded-xl bg-white shadow-sm" style={{ borderColor: '#e2e8f0' }}>
+                   <QRCode value={qrUrl} size={64} level="H" />
+                 </div>
+               )}
              </div>
           </div>
 
