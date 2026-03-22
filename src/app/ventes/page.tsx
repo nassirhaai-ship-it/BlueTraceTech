@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { jsPDF } from "jspdf";
+import { toPng } from "html-to-image";
 import { useSession } from "next-auth/react";
 import { 
   ShoppingCart, 
@@ -21,7 +23,8 @@ import {
   Plus,
   Trash,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Printer
 } from "lucide-react";
 import Link from "next/link";
 
@@ -63,6 +66,32 @@ export default function VentesPage() {
   
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [qrLoadingId, setQrLoadingId] = useState<string | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
+  const [printingSale, setPrintingSale] = useState<Sale | null>(null);
+
+  const handlePrintInvoice = async (sale: Sale) => {
+    setPrintingSale(sale);
+    // Allow the DOM to render the selected sale into the hidden invoice template
+    setTimeout(async () => {
+      if (!invoiceRef.current) {
+        setPrintingSale(null);
+        return;
+      }
+      try {
+        const dataUrl = await toPng(invoiceRef.current, { cacheBust: true, pixelRatio: 2, backgroundColor: '#ffffff' });
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (invoiceRef.current.offsetHeight * pdfWidth) / invoiceRef.current.offsetWidth;
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        window.open(pdf.output('bloburl'), '_blank');
+      } catch (error) {
+        console.error("Error generating invoice PDF:", error);
+        setToast({ type: "error", message: "Erreur lors de l'impression de la facture." });
+      } finally {
+        setPrintingSale(null);
+      }
+    }, 300);
+  };
 
   useEffect(() => {
     fetchData();
@@ -326,6 +355,14 @@ export default function VentesPage() {
                             </button>
                           )}
                           <button 
+                            onClick={() => handlePrintInvoice(sale)}
+                            disabled={printingSale?._id === sale._id}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                            title="Imprimer Facture"
+                          >
+                            {printingSale?._id === sale._id ? <Loader2 className="animate-spin" size={16} /> : <Printer size={16} />}
+                          </button>
+                          <button 
                             onClick={() => handleDeleteSale(sale._id)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                           >
@@ -433,6 +470,107 @@ export default function VentesPage() {
             </button>
           </form>
         </Modal>
+      )}
+
+      {/* Hidden Invoice Template */}
+      {printingSale && (
+        <div 
+          className="absolute w-[800px] font-sans pointer-events-none" 
+          style={{ left: '-9999px', top: 0, backgroundColor: '#ffffff', color: '#0f172a' }}
+        >
+          <div ref={invoiceRef} className="p-12 w-[800px] h-[1131px] relative flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+            {/* Header */}
+            <div className="flex justify-between items-start mb-12 border-b-2 pb-8" style={{ borderColor: '#e2e8f0' }}>
+              <div>
+                <h1 className="text-4xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace</h1>
+                <span className="font-bold tracking-[0.3em] uppercase text-xs block mt-1" style={{ color: '#0891b2' }}>Écosystème d'Intelligence</span>
+                <div className="mt-4 text-sm font-medium" style={{ color: '#64748b' }}>
+                  Zone Industrielle Aquacole, Lot 42<br />
+                  Alger, Algérie<br />
+                  contact@bluetrace.tech
+                </div>
+              </div>
+              <div className="text-right">
+                <h2 className="text-3xl font-black uppercase mb-2" style={{ color: '#0891b2' }}>FACTURE</h2>
+                <div className="inline-block px-3 py-1 rounded font-mono font-bold text-sm mb-2" style={{ backgroundColor: '#f1f5f9', color: '#0f172a' }}>
+                  N° INV-{printingSale._id.slice(-6).toUpperCase()}
+                </div>
+                <p className="text-sm font-medium" style={{ color: '#64748b' }}>Date: {new Date(printingSale.date).toLocaleDateString('fr-FR')}</p>
+              </div>
+            </div>
+
+            {/* Client Info */}
+            <div className="mb-12 p-6 rounded-xl border" style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+              <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Facturé à</p>
+              <p className="text-xl font-bold" style={{ color: '#0f172a' }}>{printingSale.client}</p>
+            </div>
+
+            {/* Table */}
+            <div className="mb-12 border rounded-xl overflow-hidden" style={{ borderColor: '#e2e8f0' }}>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr style={{ backgroundColor: '#f1f5f9' }}>
+                    <th className="py-3 px-6 text-xs font-black uppercase tracking-widest" style={{ color: '#64748b' }}>Description</th>
+                    <th className="py-3 px-6 text-xs font-black uppercase tracking-widest text-center" style={{ color: '#64748b' }}>Quantité</th>
+                    <th className="py-3 px-6 text-xs font-black uppercase tracking-widest text-right" style={{ color: '#64748b' }}>Montant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-t" style={{ borderColor: '#e2e8f0' }}>
+                    <td className="py-6 px-6">
+                      <p className="font-bold text-base mb-1" style={{ color: '#0f172a' }}>Lot Aquacole: {printingSale.lotName}</p>
+                      <p className="text-xs font-mono" style={{ color: '#64748b' }}>Réf Lot: {printingSale.lotId}</p>
+                    </td>
+                    <td className="py-6 px-6 text-center font-bold" style={{ color: '#0891b2' }}>
+                      {printingSale.quantite} kg
+                    </td>
+                    <td className="py-6 px-6 text-right font-black text-lg" style={{ color: '#0f172a' }}>
+                      {new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(printingSale.montant)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Total */}
+            <div className="flex justify-end mb-16">
+              <div className="w-1/2 rounded-xl p-6" style={{ backgroundColor: '#f8fafc' }}>
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold" style={{ color: '#64748b' }}>Sous-total</span>
+                  <span className="font-bold" style={{ color: '#0f172a' }}>{new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(printingSale.montant)}</span>
+                </div>
+                <div className="flex justify-between items-center mb-4 pb-4 border-b" style={{ borderColor: '#e2e8f0' }}>
+                  <span className="text-sm font-bold" style={{ color: '#64748b' }}>TVA (0%)</span>
+                  <span className="font-bold" style={{ color: '#0f172a' }}>0,00 DZD</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-black uppercase tracking-widest" style={{ color: '#0891b2' }}>Total TTC</span>
+                  <span className="text-2xl font-black" style={{ color: '#0f172a' }}>{new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(printingSale.montant)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer / Stamp */}
+            <div className="mt-auto pt-8 border-t flex justify-between items-end relative" style={{ borderColor: '#e2e8f0' }}>
+              <div>
+                <p className="text-xs font-medium" style={{ color: '#64748b' }}>Merci de votre confiance.</p>
+                <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>Pour toute question, contactez le support BlueTrace.</p>
+              </div>
+              <div className="text-center relative">
+                {/* Stamp */}
+                <div className="absolute right-12 bottom-4 transform rotate-12 opacity-80 pointer-events-none">
+                  <div className="border-[4px] rounded-full w-32 h-32 flex items-center justify-center flex-col" style={{ borderColor: '#10b981', color: '#10b981' }}>
+                    <span className="text-xl font-black uppercase tracking-widest mt-2">PAYÉ</span>
+                    <span className="text-[8px] font-bold uppercase tracking-widest mt-1">BlueTrace Tech</span>
+                  </div>
+                </div>
+                <p className="text-xs font-black uppercase tracking-widest mb-8 text-transparent">Signature</p>
+                <p className="font-bold uppercase tracking-widest text-xs" style={{ color: '#0f172a' }}>Direction Financière</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: '#64748b' }}>BlueTrace Tech</p>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
