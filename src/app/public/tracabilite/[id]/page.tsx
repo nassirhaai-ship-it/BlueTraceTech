@@ -195,7 +195,7 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
                 <h1 className="text-sm font-black text-cyan-600 uppercase tracking-[0.3em]">Certificat d'Authenticité Digital</h1>
               </div>
               <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-                BlueTrace <br />
+                BlueTrace Tech <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-700">Verified.</span>
               </h2>
             </div>
@@ -344,7 +344,7 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
                   <ShieldCheck size={36} />
                </div>
                <div>
-                 <h1 className="text-3xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace</h1>
+                 <h1 className="text-3xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace Tech</h1>
                  <span className="font-bold tracking-[0.3em] uppercase text-[10px] block mt-1" style={{ color: '#0e7490' }}>Écosystème d'Intelligence</span>
                </div>
              </div>
@@ -361,7 +361,7 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
              </div>
              <h2 className="text-4xl font-black uppercase tracking-tight mb-4" style={{ fontFamily: 'Georgia, serif', color: '#164e63' }}>CERTIFICAT D'AUTHENTICITÉ</h2>
              <p className="font-mono text-sm tracking-widest max-w-lg mx-auto leading-relaxed" style={{ color: '#64748b' }}>
-               Généré automatiquement par le registre immuable BlueTrace Verified.
+               Généré automatiquement par le registre immuable BlueTrace Tech Verified.
              </p>
           </div>
 
@@ -451,7 +451,7 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
                    Nassir H.A.
                 </div>
                 <p className="font-bold uppercase tracking-widest text-xs" style={{ color: '#1e293b' }}>Directeur Qualité</p>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: '#94a3b8' }}>AquaAI / BlueTrace</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: '#94a3b8' }}>AquaAI / BlueTrace Tech</p>
              </div>
              
              {/* Fake Official Seal */}
@@ -463,7 +463,7 @@ export default function TracabilitePage({ params }: { params: Promise<{ id: stri
                 {/* Inner Content */}
                 <div className="absolute inset-3 border-[3px] opacity-90 rounded-full flex justify-center items-center flex-col text-center z-10 shadow-inner" style={{ backgroundColor: '#ecfeff', borderColor: '#155e75' }}>
                    <ShieldCheck size={32} strokeWidth={2.5} color="#155e75" className="mb-1"/>
-                   <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#164e63' }}>BlueTrace</span>
+                   <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#164e63' }}>BlueTrace Tech</span>
                    <span className="text-[7px] font-bold uppercase tracking-widest opacity-80 mt-0.5" style={{ color: '#155e75' }}>Certified Origin</span>
                 </div>
                 {/* Stamp overlay */}

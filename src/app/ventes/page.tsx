@@ -25,7 +25,8 @@ import {
   Loader2,
   AlertCircle,
   Printer,
-  ChevronDown
+  ChevronDown,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 
@@ -54,10 +55,12 @@ interface Client {
   email: string;
   telephone: string;
   adresse: string;
-  rc: string;
-  nif: string;
-  nis: string;
-  ai: string;
+  fiscal?: {
+    rc: string;
+    nif: string;
+    nis: string;
+    ai: string;
+  };
 }
 
 export default function VentesPage() {
@@ -237,6 +240,50 @@ export default function VentesPage() {
     s.client?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Mathématiques réelles pour les tendances (Mois par rapport au mois précédent)
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  const currentMonthSales = sales.filter(s => {
+    const d = new Date(s.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+  
+  const previousMonthSales = sales.filter(s => {
+    const d = new Date(s.date);
+    return d.getMonth() === (currentMonth === 0 ? 11 : currentMonth - 1) && 
+           d.getFullYear() === (currentMonth === 0 ? currentYear - 1 : currentYear);
+  });
+
+  const calculateTrend = (current: number, previous: number, format: 'percent' | 'absolute' = 'percent') => {
+    if (previous === 0) return current > 0 ? "+100%" : "0%";
+    const diff = current - previous;
+    if (format === 'absolute') return diff > 0 ? `+${diff}` : `${diff}`;
+    const percent = (diff / previous) * 100;
+    return percent > 0 ? `+${percent.toFixed(1)}%` : `${percent.toFixed(1)}%`;
+  };
+
+  const trendVentes = calculateTrend(
+    currentMonthSales.reduce((acc, s) => acc + s.montant, 0),
+    previousMonthSales.reduce((acc, s) => acc + s.montant, 0)
+  );
+
+  const trendCertificats = calculateTrend(
+    currentMonthSales.filter(s => s.certificatGenere).length,
+    previousMonthSales.filter(s => s.certificatGenere).length
+  );
+
+  const trendVolume = calculateTrend(
+    currentMonthSales.reduce((acc, s) => acc + s.quantite, 0),
+    previousMonthSales.reduce((acc, s) => acc + s.quantite, 0)
+  );
+
+  const trendClients = calculateTrend(
+    new Set(currentMonthSales.map(s => s.client)).size,
+    new Set(previousMonthSales.map(s => s.client)).size,
+    'absolute'
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8 lg:p-12 relative">
       {/* Toast Notification */}
@@ -283,10 +330,10 @@ export default function VentesPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: "Ventes totales", value: formatCurrency(sales.reduce((acc, s) => acc + s.montant, 0)), icon: <Tag className="w-6 h-6" />, color: "from-cyan-500 to-blue-500", trend: "+12.5%" },
-            { label: "Certificats émis", value: sales.filter(s => s.certificatGenere).length.toString(), icon: <BadgeCheck className="w-6 h-6" />, color: "from-green-500 to-emerald-500", trend: "+8.2%" },
-            { label: "Volume vendu", value: `${sales.reduce((acc, s) => acc + s.quantite, 0)} kg`, icon: <Layers className="w-6 h-6" />, color: "from-purple-500 to-indigo-500", trend: "+5.1%" },
-            { label: "Clients actifs", value: new Set(sales.map(s => s.client)).size.toString(), icon: <CheckCircle2 className="w-6 h-6" />, color: "from-blue-500 to-cyan-500", trend: "+2" },
+            { label: "Ventes totales", value: formatCurrency(sales.reduce((acc, s) => acc + s.montant, 0)), icon: <Tag className="w-6 h-6" />, color: "from-cyan-500 to-blue-500", trend: trendVentes },
+            { label: "Certificats émis", value: sales.filter(s => s.certificatGenere).length.toString(), icon: <BadgeCheck className="w-6 h-6" />, color: "from-green-500 to-emerald-500", trend: trendCertificats },
+            { label: "Volume vendu", value: `${sales.reduce((acc, s) => acc + s.quantite, 0)} kg`, icon: <Layers className="w-6 h-6" />, color: "from-purple-500 to-indigo-500", trend: trendVolume },
+            { label: "Clients enregistrés", value: clients.length.toString(), icon: <Users className="w-6 h-6" />, color: "from-blue-500 to-cyan-500", trend: trendClients },
           ].map((stat, i) => (
             <div key={i} className="bg-white shadow-sm p-6 rounded-lg hover:shadow-md transition-all">
               <div className="flex items-center justify-between">
@@ -555,7 +602,7 @@ export default function VentesPage() {
             {/* Header */}
             <div className="flex justify-between items-start mb-12 border-b-2 pb-8" style={{ borderColor: '#e2e8f0' }}>
               <div>
-                <h1 className="text-4xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace</h1>
+                <h1 className="text-4xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace Tech</h1>
                 <span className="font-bold tracking-[0.3em] uppercase text-xs block mt-1" style={{ color: '#0891b2' }}>Écosystème d'Intelligence</span>
                 <div className="mt-4 text-sm font-medium" style={{ color: '#64748b' }}>
                   Zone Industrielle Aquacole, Lot 42<br />
@@ -584,13 +631,13 @@ export default function VentesPage() {
                   <p className="text-sm font-medium" style={{ color: '#64748b' }}>Tél: {printingClient.telephone}</p>
                 )}
               </div>
-              {printingClient && (
+              {printingClient && printingClient.fiscal && (
                 <div className="text-right flex flex-col items-end justify-center">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-left" style={{ color: '#475569' }}>
-                    {printingClient.nif && <><span className="font-bold text-right uppercase tracking-widest">NIF:</span><span className="font-mono">{printingClient.nif}</span></>}
-                    {printingClient.nis && <><span className="font-bold text-right uppercase tracking-widest">NIS:</span><span className="font-mono">{printingClient.nis}</span></>}
-                    {printingClient.rc && <><span className="font-bold text-right uppercase tracking-widest">RC:</span><span className="font-mono">{printingClient.rc}</span></>}
-                    {printingClient.ai && <><span className="font-bold text-right uppercase tracking-widest">AI:</span><span className="font-mono">{printingClient.ai}</span></>}
+                    {printingClient.fiscal.nif && <><span className="font-bold text-right uppercase tracking-widest">NIF:</span><span className="font-mono">{printingClient.fiscal.nif}</span></>}
+                    {printingClient.fiscal.nis && <><span className="font-bold text-right uppercase tracking-widest">NIS:</span><span className="font-mono">{printingClient.fiscal.nis}</span></>}
+                    {printingClient.fiscal.rc && <><span className="font-bold text-right uppercase tracking-widest">RC:</span><span className="font-mono">{printingClient.fiscal.rc}</span></>}
+                    {printingClient.fiscal.ai && <><span className="font-bold text-right uppercase tracking-widest">AI:</span><span className="font-mono">{printingClient.fiscal.ai}</span></>}
                   </div>
                 </div>
               )}
@@ -645,7 +692,7 @@ export default function VentesPage() {
             <div className="mt-auto pt-8 border-t flex justify-between items-end relative" style={{ borderColor: '#e2e8f0' }}>
               <div>
                 <p className="text-xs font-medium" style={{ color: '#64748b' }}>Merci de votre confiance.</p>
-                <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>Pour toute question, contactez le support BlueTrace.</p>
+                <p className="text-xs font-medium mt-1" style={{ color: '#64748b' }}>Pour toute question, contactez le support BlueTrace Tech.</p>
               </div>
               <div className="text-center relative">
                 {/* Stamp */}
