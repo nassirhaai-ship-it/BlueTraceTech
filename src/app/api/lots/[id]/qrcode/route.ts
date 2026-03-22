@@ -42,7 +42,9 @@ export async function GET(
     }
     
     // Créer l'URL pour la page de traçabilité publique
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || "http://localhost:3000";
+    const protocol = req.headers.get("x-forwarded-proto") || "https";
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
     const qrCodeUrl = `${baseUrl}/public/tracabilite/${id}`;
     
     // Générer le QR code
