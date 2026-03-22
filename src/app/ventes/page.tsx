@@ -24,7 +24,8 @@ import {
   Trash,
   Loader2,
   AlertCircle,
-  Printer
+  Printer,
+  ChevronDown
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,12 +48,25 @@ interface Lot {
   statut: string;
 }
 
+interface Client {
+  _id: string;
+  nom: string;
+  email: string;
+  telephone: string;
+  adresse: string;
+  rc: string;
+  nif: string;
+  nis: string;
+  ai: string;
+}
+
 export default function VentesPage() {
   const { data: session } = useSession();
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [sales, setSales] = useState<Sale[]>([]);
   const [lots, setLots] = useState<Lot[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,17 +78,26 @@ export default function VentesPage() {
   });
   const [modalError, setModalError] = useState<string | null>(null);
   
+  const [clientSearch, setClientSearch] = useState("");
+  const [isClientDropdownOpen, setIsClientDropdownOpen] = useState(false);
+  const filteredClients = clients.filter(c => (c.nom || "").toLowerCase().includes((clientSearch || "").toLowerCase()));
+  
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [qrLoadingId, setQrLoadingId] = useState<string | null>(null);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const [printingSale, setPrintingSale] = useState<Sale | null>(null);
+  const [printingClient, setPrintingClient] = useState<Client | null>(null);
 
   const handlePrintInvoice = async (sale: Sale) => {
     setPrintingSale(sale);
+    const foundClient = clients.find(c => c.nom === sale.client) || null;
+    setPrintingClient(foundClient);
+
     // Allow the DOM to render the selected sale into the hidden invoice template
     setTimeout(async () => {
       if (!invoiceRef.current) {
         setPrintingSale(null);
+        setPrintingClient(null);
         return;
       }
       try {
@@ -89,6 +112,7 @@ export default function VentesPage() {
         setToast({ type: "error", message: "Erreur lors de l'impression de la facture." });
       } finally {
         setPrintingSale(null);
+        setPrintingClient(null);
       }
     }, 300);
   };
@@ -100,9 +124,10 @@ export default function VentesPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [salesRes, lotsRes] = await Promise.all([
+      const [salesRes, lotsRes, clientsRes] = await Promise.all([
         fetch("/api/ventes"),
-        fetch("/api/lots")
+        fetch("/api/lots"),
+        fetch("/api/clients")
       ]);
       
       if (salesRes.ok) {
@@ -113,6 +138,11 @@ export default function VentesPage() {
       if (lotsRes.ok) {
         const lotsData = await lotsRes.json();
         setLots(lotsData);
+      }
+
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        setClients(clientsData);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
@@ -419,16 +449,59 @@ export default function VentesPage() {
               </select>
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 relative">
               <label className="text-sm font-medium text-gray-700">Client</label>
-              <input 
-                type="text"
-                placeholder="Nom du client..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent font-medium"
-                value={newSale.client}
-                onChange={(e) => setNewSale({...newSale, client: e.target.value})}
-                required
-              />
+              <div 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg cursor-pointer bg-white flex justify-between items-center hover:border-gray-400 transition-colors"
+                onClick={() => setIsClientDropdownOpen(!isClientDropdownOpen)}
+              >
+                <span className={`font-medium ${newSale.client ? 'text-black' : 'text-gray-500'}`}>
+                  {newSale.client || "Sélectionner un client..."}
+                </span>
+                <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isClientDropdownOpen ? 'rotate-180' : ''}`} />
+              </div>
+              
+              {isClientDropdownOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsClientDropdownOpen(false)}></div>
+                  <div className="absolute top-[100%] mt-2 left-0 w-full z-50 bg-white border border-gray-200 rounded-xl shadow-xl max-h-72 flex flex-col py-1 overflow-hidden animate-in fade-in slide-in-from-top-1">
+                    <div className="px-2 pb-2 pt-2 border-b border-gray-100 flex-shrink-0 relative z-50">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <input 
+                          type="text"
+                          placeholder="Rechercher un client..."
+                          className="w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-cyan-500 focus:border-transparent focus:outline-none"
+                          value={clientSearch}
+                          onChange={(e) => setClientSearch(e.target.value)}
+                          onClick={(e) => e.stopPropagation()}
+                          autoFocus
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-y-auto flex-1 p-1.5 relative z-50">
+                      {filteredClients.length > 0 ? (
+                        filteredClients.map(client => (
+                          <div 
+                            key={client._id}
+                            className="px-3 py-2.5 hover:bg-cyan-50 cursor-pointer rounded-lg text-sm font-medium text-black transition-colors flex items-center justify-between"
+                            onClick={() => {
+                              setNewSale({...newSale, client: client.nom});
+                              setIsClientDropdownOpen(false);
+                              setClientSearch("");
+                            }}
+                          >
+                            <span>{client.nom}</span>
+                            {newSale.client === client.nom && <CheckCircle2 size={16} className="text-cyan-600" />}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-3 py-6 text-center text-sm text-gray-500">Aucun client trouvé</div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -500,9 +573,27 @@ export default function VentesPage() {
             </div>
 
             {/* Client Info */}
-            <div className="mb-12 p-6 rounded-xl border" style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
-              <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Facturé à</p>
-              <p className="text-xl font-bold" style={{ color: '#0f172a' }}>{printingSale.client}</p>
+            <div className="mb-12 p-6 rounded-xl border grid grid-cols-2 gap-6" style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Facturé à</p>
+                <p className="text-xl font-bold mb-2" style={{ color: '#0f172a' }}>{printingSale.client}</p>
+                {printingClient && printingClient.adresse && (
+                  <p className="text-sm font-medium mb-1 line-clamp-2" style={{ color: '#64748b' }}>{printingClient.adresse}</p>
+                )}
+                {printingClient && printingClient.telephone && (
+                  <p className="text-sm font-medium" style={{ color: '#64748b' }}>Tél: {printingClient.telephone}</p>
+                )}
+              </div>
+              {printingClient && (
+                <div className="text-right flex flex-col items-end justify-center">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] text-left" style={{ color: '#475569' }}>
+                    {printingClient.nif && <><span className="font-bold text-right uppercase tracking-widest">NIF:</span><span className="font-mono">{printingClient.nif}</span></>}
+                    {printingClient.nis && <><span className="font-bold text-right uppercase tracking-widest">NIS:</span><span className="font-mono">{printingClient.nis}</span></>}
+                    {printingClient.rc && <><span className="font-bold text-right uppercase tracking-widest">RC:</span><span className="font-mono">{printingClient.rc}</span></>}
+                    {printingClient.ai && <><span className="font-bold text-right uppercase tracking-widest">AI:</span><span className="font-mono">{printingClient.ai}</span></>}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Table */}
