@@ -57,13 +57,7 @@ export default function VentesPage() {
     lotId: "",
     client: "",
     quantite: 0,
-    montant: 0,
-    clientAdresse: "",
-    clientTelephone: "",
-    nif: "",
-    ai: "",
-    rc: "",
-    nis: ""
+    montant: 0
   });
   const [modalError, setModalError] = useState<string | null>(null);
   
@@ -122,18 +116,7 @@ export default function VentesPage() {
       if (res.ok) {
         setToast({ type: "success", message: "Vente enregistrée avec succès" });
         setShowAddModal(false);
-        setNewSale({ 
-          lotId: "", 
-          client: "", 
-          quantite: 0, 
-          montant: 0,
-          clientAdresse: "",
-          clientTelephone: "",
-          nif: "",
-          ai: "",
-          rc: "",
-          nis: ""
-        });
+        setNewSale({ lotId: "", client: "", quantite: 0, montant: 0 });
         fetchData();
       } else {
         const error = await res.json();
@@ -274,9 +257,6 @@ export default function VentesPage() {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent w-full"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-gray-50 border border-gray-300 rounded-lg hover:bg-gray-100 transition-all font-medium">
-              <Filter size={18} /> Filtres
-            </button>
           </div>
         </div>
 
@@ -403,80 +383,15 @@ export default function VentesPage() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">Client / Entreprise</label>
+              <label className="text-sm font-medium text-gray-700">Client</label>
               <input 
                 type="text"
-                placeholder="Nom complet du client..."
+                placeholder="Nom du client..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent font-medium"
                 value={newSale.client}
                 onChange={(e) => setNewSale({...newSale, client: e.target.value})}
                 required
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Adresse</label>
-                <input 
-                  type="text"
-                  placeholder="Adresse..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent font-medium"
-                  value={newSale.clientAdresse}
-                  onChange={(e) => setNewSale({...newSale, clientAdresse: e.target.value})}
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Téléphone</label>
-                <input 
-                  type="text"
-                  placeholder="0..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent font-medium"
-                  value={newSale.clientTelephone}
-                  onChange={(e) => setNewSale({...newSale, clientTelephone: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-xl space-y-4">
-              <h3 className="text-sm font-bold text-gray-900 border-b pb-2 uppercase tracking-wider">Informations Fiscales</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase">NIF</label>
-                  <input 
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-cyan-500 outline-none"
-                    value={newSale.nif}
-                    onChange={(e) => setNewSale({...newSale, nif: e.target.value})}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase">AI (Art. Imp)</label>
-                  <input 
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-cyan-500 outline-none"
-                    value={newSale.ai}
-                    onChange={(e) => setNewSale({...newSale, ai: e.target.value})}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase">RC</label>
-                  <input 
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-cyan-500 outline-none"
-                    value={newSale.rc}
-                    onChange={(e) => setNewSale({...newSale, rc: e.target.value})}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase">NIS</label>
-                  <input 
-                    type="text"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-cyan-500 outline-none"
-                    value={newSale.nis}
-                    onChange={(e) => setNewSale({...newSale, nis: e.target.value})}
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

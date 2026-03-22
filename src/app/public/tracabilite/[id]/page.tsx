@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import Image from "next/image";
+import { jsPDF } from "jspdf";
+import { toPng } from 'html-to-image';
 import {
   ArrowLeft,
   Fish,
@@ -11,6 +13,7 @@ import {
   Waves,
   Scale,
   Ruler,
+  Loader2,
   Calendar,
   Info,
   Award,
@@ -41,7 +44,8 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 interface Mesure {
   _id: string;
-  timestamp: string;
+  timestamp?: string;
+  date?: string;
   temperature: number;
   ph: number;
   oxygen: number;
@@ -74,15 +78,16 @@ interface LotData {
   };
 }
 
-export default function TracabilitePage({ params }: { params: { id: string } }) {
+export default function TracabilitePage({ params }: { params: Promise<{ id: string }> }) {
   const [lot, setLot] = useState<LotData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [mesuresHistoriques, setMesuresHistoriques] = useState<Mesure[]>([]);
   const certificateRef = useRef<HTMLDivElement>(null);
-  const lotId = params.id;
+  const { id: lotId } = use(params);
 
   useEffect(() => {
     const fetchLotData = async () => {
@@ -102,6 +107,39 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
 
   const formatDate = (d: string | undefined) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : "---";
 
+  const generatePDF = async () => {
+    if (!certificateRef.current) return;
+    setIsGeneratingPDF(true);
+    
+    try {
+      // Allow time for rendering (fonts, layout)
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const element = certificateRef.current;
+      const dataUrl = await toPng(element, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff'
+      });
+      
+      const pdf = new jsPDF('p', 'mm', 'a4'); 
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (element.offsetHeight * pdfWidth) / element.offsetWidth;
+      
+      pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      // Open the generated PDF in a new tab
+      const pdfBlobHtmlUrl = pdf.output('bloburl');
+      window.open(pdfBlobHtmlUrl, '_blank');
+      
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Une erreur est survenue lors de la génération du PDF.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   const chartOptions = {
     responsive: true,
     plugins: { legend: { display: false } },
@@ -114,7 +152,10 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
   const getChartData = (mesures: Mesure[] | undefined, metrique: string, color: string) => {
     if (!mesures || mesures.length === 0) return null;
     return {
-      labels: mesures.map(m => new Date(m.timestamp).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })).reverse(),
+      labels: mesures.map(m => {
+        const d = m.date || m.timestamp;
+        return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '---';
+      }).reverse(),
       datasets: [{
         label: metrique,
         data: mesures.map(m => m[metrique as keyof Mesure] as number).reverse(),
@@ -160,10 +201,12 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
             </div>
             <div className="flex gap-4">
               <button 
-                onClick={() => window.print()} 
-                className="px-6 py-3 bg-white border border-slate-200 shadow-sm rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 hover:shadow-md transition-all flex items-center gap-2"
+                onClick={generatePDF} 
+                disabled={isGeneratingPDF}
+                className="px-6 py-3 bg-white border border-slate-200 shadow-sm rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 hover:shadow-md transition-all flex items-center gap-2 disabled:opacity-50"
               >
-                <Download size={16} /> Imprimer
+                {isGeneratingPDF ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />} 
+                {isGeneratingPDF ? "Génération..." : "Imprimer"}
               </button>
             </div>
           </div>
@@ -223,10 +266,13 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
             {lot.mesures && lot.mesures.length > 0 && (
               <div className="premium-card !bg-white !border-slate-200 shadow-xl rounded-3xl p-8">
                 <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight mb-8">Historique Environnemental</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {[
                     { label: "Température", key: "temperature", color: "#ef4444", unit: "°C" },
-                    { label: "Oxygène", key: "oxygen", color: "#3b82f6", unit: "mg/L" }
+                    { label: "pH", key: "ph", color: "#10b981", unit: "" },
+                    { label: "Oxygène", key: "oxygen", color: "#3b82f6", unit: "mg/L" },
+                    { label: "Salinité", key: "salinity", color: "#8b5cf6", unit: "ppt" },
+                    { label: "Turbidité", key: "turbidity", color: "#f59e0b", unit: "NTU" }
                   ].map(m => (
                     <div key={m.key} className="space-y-4">
                       <div className="flex justify-between items-center px-2">
@@ -280,6 +326,154 @@ export default function TracabilitePage({ params }: { params: { id: string } }) 
            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em]">© 2026 BlueTrace Tech — Ecosystem of Intelligence</p>
         </div>
       </footer>
+
+      {/* Hidden PDF Certificate Template */}
+      <div 
+        className="absolute w-[800px] font-sans pointer-events-none" 
+        style={{ left: '-9999px', top: 0, backgroundColor: '#ffffff', color: '#0f172a' }}
+      >
+        <div ref={certificateRef} className="p-12 w-[800px] h-[1131px] relative flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+          {/* Borders */}
+          <div className="absolute inset-4 border-4 rounded-sm" style={{ borderColor: '#155e75' }}></div>
+          <div className="absolute inset-5 border opacity-30 rounded-sm" style={{ borderColor: '#0891b2' }}></div>
+          
+          {/* Header */}
+          <div className="flex justify-between items-center mb-16 pt-8 px-8 border-b-2 pb-8" style={{ borderColor: '#e2e8f0' }}>
+             <div className="flex items-center gap-4">
+               <div className="w-16 h-16 rounded-2xl flex items-center justify-center border" style={{ backgroundColor: '#ecfeff', borderColor: '#a5f3fc', color: '#155e75' }}>
+                  <ShieldCheck size={36} />
+               </div>
+               <div>
+                 <h1 className="text-3xl font-black tracking-tighter uppercase leading-none" style={{ color: '#0f172a' }}>BlueTrace</h1>
+                 <span className="font-bold tracking-[0.3em] uppercase text-[10px] block mt-1" style={{ color: '#0e7490' }}>Écosystème d'Intelligence</span>
+               </div>
+             </div>
+             <div className="text-right">
+                <span className="font-mono text-[10px] tracking-widest uppercase block mb-1" style={{ color: '#94a3b8' }}>Réf. Document</span>
+                <span className="font-mono text-xs font-bold px-3 py-1 rounded" style={{ backgroundColor: '#f1f5f9', color: '#1e293b' }}>DOC-{lot._id.slice(-6).toUpperCase()}</span>
+             </div>
+          </div>
+
+          {/* Certificate Title */}
+          <div className="text-center mb-16 px-8 relative z-10">
+             <div className="inline-block px-4 py-1 border text-[10px] font-black uppercase tracking-widest rounded-full mb-6" style={{ backgroundColor: '#ecfeff', borderColor: '#a5f3fc', color: '#155e75' }}>
+                Approuvé par Inspection Qualité
+             </div>
+             <h2 className="text-4xl font-black uppercase tracking-tight mb-4" style={{ fontFamily: 'Georgia, serif', color: '#164e63' }}>CERTIFICAT D'AUTHENTICITÉ</h2>
+             <p className="font-mono text-sm tracking-widest max-w-lg mx-auto leading-relaxed" style={{ color: '#64748b' }}>
+               Généré automatiquement par le registre immuable BlueTrace Verified.
+             </p>
+          </div>
+
+          {/* Content */}
+          <div className="px-12 flex-1 relative z-10">
+             <p className="text-lg leading-relaxed mb-12 text-center max-w-xl mx-auto" style={{ color: '#334155' }}>
+               Ce document certifie formellement la traçabilité intégrale, les conditions d'élevage optimales et l'origine garantie du lot aquacole identifié ci-dessous.
+             </p>
+
+             <div className="border p-8 rounded-xl grid grid-cols-2 gap-y-8 gap-x-8 mb-12 relative overflow-hidden" style={{ backgroundColor: '#f8fafc', borderColor: '#e2e8f0' }}>
+               <div className="absolute -right-10 -bottom-10 opacity-5 rotate-12 pointer-events-none" style={{ color: '#164e63' }}>
+                  <ShieldCheck size={200} />
+               </div>
+               
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Désignation du Lot</p>
+                 <p className="font-bold text-xl" style={{ color: '#1e293b' }}>{lot.nom}</p>
+                 <p className="text-[10px] font-mono mt-1" style={{ color: '#94a3b8' }}>ID: {lot._id}</p>
+               </div>
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Espèce Cultivée</p>
+                 <p className="font-bold text-lg flex items-center gap-2" style={{ color: '#1e293b' }}><Fish size={18} color="#0891b2"/> {lot.espece}</p>
+               </div>
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Stade de Croissance</p>
+                 <p className="font-bold text-base flex items-center gap-2" style={{ color: '#1e293b' }}><Activity size={16} color="#9333ea"/> {lot.stade}</p>
+               </div>
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Poids Moyen</p>
+                 <p className="font-bold text-base flex items-center gap-2" style={{ color: '#1e293b' }}><Scale size={16} color="#d97706"/> {lot.poidsMoyen || 0} g</p>
+               </div>
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Origine / Bassin</p>
+                 <p className="font-bold text-base flex items-center gap-2" style={{ color: '#1e293b' }}><MapPin size={16} color="#059669"/> {lot.bassinNom}</p>
+               </div>
+               <div>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Date d'Émission</p>
+                 <p className="font-bold text-base flex items-center gap-2" style={{ color: '#1e293b' }}><Calendar size={16} color="#94a3b8"/> {formatDate(new Date().toString())}</p>
+               </div>
+               <div className="col-span-2 pt-4 border-t" style={{ borderColor: '#e2e8f0' }}>
+                 <p className="text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#94a3b8' }}>Hachage de Validation (SHA-256)</p>
+                 <p className="text-xs font-mono px-3 py-2 rounded break-all tracking-wider" style={{ backgroundColor: '#e2e8f0', color: '#475569' }}>{Buffer.from(lot._id).toString('hex').padEnd(64, '0')}</p>
+               </div>
+             </div>
+
+             <div className="rounded-xl border overflow-hidden mb-8" style={{ backgroundColor: '#ecfdf5', borderColor: '#a7f3d0' }}>
+               <div className="p-4 flex items-center gap-3" style={{ backgroundColor: '#10b981' }}>
+                 <CheckCircle2 className="w-6 h-6" color="#ffffff" />
+                 <h4 className="text-sm font-black uppercase tracking-widest m-0" style={{ color: '#ffffff' }}>Conformité des Métriques Environnementales</h4>
+               </div>
+               <div className="p-6">
+                 <p className="text-sm leading-relaxed font-medium mb-6" style={{ color: '#047857' }}>
+                   L'historique des paramètres mesurés par les capteurs IoT confirme le maintien optimal des conditions de viabilité biologique.
+                 </p>
+                 
+                 {lot.statistiques && (
+                   <div className="flex justify-between gap-2 overflow-hidden">
+                     {[
+                       { label: 'Température', icon: Thermometer, data: lot.statistiques.temperature, unit: '°C', color: '#ef4444' },
+                       { label: 'pH', icon: Activity, data: lot.statistiques.ph, unit: '', color: '#10b981' },
+                       { label: 'Oxygène', icon: Waves, data: lot.statistiques.oxygen, unit: 'mg/L', color: '#3b82f6' },
+                       { label: 'Salinité', icon: Droplets, data: lot.statistiques.salinity, unit: 'ppt', color: '#8b5cf6' },
+                       { label: 'Turbidité', icon: Info, data: lot.statistiques.turbidity, unit: 'NTU', color: '#f59e0b' }
+                     ].map((stat, i) => stat.data ? (
+                       <div key={i} className="border rounded-lg p-3 text-center flex-1 shadow-sm" style={{ backgroundColor: '#ffffff', borderColor: '#a7f3d0' }}>
+                          <stat.icon size={16} color={stat.color} className="mx-auto mb-2" />
+                          <p className="text-[8px] uppercase font-black tracking-widest mb-1" style={{ color: '#065f46' }}>{stat.label}</p>
+                          <p className="text-lg font-black" style={{ color: '#064e3b' }}>{stat.data.moyenne.toFixed(1)}<span className="text-[10px] ml-1">{stat.unit}</span></p>
+                          <div className="mt-2 pt-2 border-t flex justify-between px-1" style={{ borderColor: '#ecfdf5' }}>
+                            <span className="text-[8px] font-bold" style={{ color: '#059669' }}>Min: {stat.data.min.toFixed(1)}</span>
+                            <span className="text-[8px] font-bold" style={{ color: '#047857' }}>Max: {stat.data.max.toFixed(1)}</span>
+                          </div>
+                       </div>
+                     ) : null)}
+                   </div>
+                 )}
+               </div>
+             </div>
+          </div>
+
+          {/* Signatures & Seal */}
+          <div className="px-12 pb-12 flex justify-between items-end mt-auto relative z-10">
+             <div className="text-center relative ml-8">
+                <p className="text-[10px] font-black uppercase tracking-widest mb-12 border-t pt-4 w-48 mx-auto" style={{ color: '#94a3b8', borderColor: '#cbd5e1' }}>Signature Autorisée</p>
+                {/* Fake Signature Script */}
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-32 h-16 opacity-80" style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: '28px', color: '#1e293b', transform: 'translateX(-50%) rotate(-5deg)', letterSpacing: '-1px' }}>
+                   Nassir H.A.
+                </div>
+                <p className="font-bold uppercase tracking-widest text-xs" style={{ color: '#1e293b' }}>Directeur Qualité</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: '#94a3b8' }}>AquaAI / BlueTrace</p>
+             </div>
+             
+             {/* Fake Official Seal */}
+             <div className="relative w-40 h-40 flex items-center justify-center mr-8">
+                {/* Outer Ring */}
+                <div className="absolute inset-0 border-[6px] opacity-20 rounded-full flex items-center justify-center" style={{ borderColor: '#155e75' }}>
+                    <div className="absolute inset-1 border-[1px] opacity-40 border-dashed rounded-full pointer-events-none transform -rotate-45" style={{ animation: 'spin 30s linear infinite', borderColor: '#155e75' }}></div>
+                </div>
+                {/* Inner Content */}
+                <div className="absolute inset-3 border-[3px] opacity-90 rounded-full flex justify-center items-center flex-col text-center z-10 shadow-inner" style={{ backgroundColor: '#ecfeff', borderColor: '#155e75' }}>
+                   <ShieldCheck size={32} strokeWidth={2.5} color="#155e75" className="mb-1"/>
+                   <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#164e63' }}>BlueTrace</span>
+                   <span className="text-[7px] font-bold uppercase tracking-widest opacity-80 mt-0.5" style={{ color: '#155e75' }}>Certified Origin</span>
+                </div>
+                {/* Stamp overlay */}
+                <div className="absolute z-20 px-3 py-1.5 transform -rotate-12 border-2 opacity-60 shadow-sm" style={{ top: '65%', left: '10%', backgroundColor: '#ffffff', borderColor: '#155e75' }}>
+                  <span className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: '#164e63' }}>APPROUVÉ</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

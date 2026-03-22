@@ -45,6 +45,13 @@ export default function Sidebar() {
       roles: ["admin", "operateur", "distributeur"]
     },
     {
+      name: "Clients",
+      href: "/clients",
+      icon: Users,
+      description: "Gestion des clients",
+      roles: ["admin", "distributeur"]
+    },
+    {
       name: "Historique",
       href: "/historique",
       icon: History,
