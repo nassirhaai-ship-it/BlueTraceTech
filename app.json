@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "4eebcd61-75be-41cf-84b5-f61aa8906bd9"
+      }
+    },
+    "android": {
+      "package": "com.bluetrachtech"
+    }
+  }
+}

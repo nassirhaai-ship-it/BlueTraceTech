@@ -77,6 +77,22 @@ export default function Home() {
 
 
           <div className="flex items-center gap-4">
+            <a 
+              href="/bluetrace-scanner.apk" 
+              download
+              className="px-4 py-2 rounded-xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center gap-3 shadow-lg"
+            >
+              <svg viewBox="0 0 512 512" className="w-5 h-5">
+                <path fill="#28B2F6" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"/>
+                <path fill="#02ED95" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/>
+                <path fill="#FF3A44" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+                <path fill="#FFCE00" d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z"/>
+              </svg>
+              <div className="flex flex-col items-start leading-none text-white">
+                <span className="text-[9px] text-gray-400 font-medium mb-1 uppercase">Télécharger l'</span>
+                <span className="text-sm font-bold tracking-tight">App Android</span>
+              </div>
+            </a>
             <button onClick={() => router.push('/auth/signin')} className="px-6 py-2.5 rounded-full bg-foreground text-background font-bold hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all duration-300">
               DÉPLOYER
             </button>
@@ -111,10 +127,22 @@ export default function Home() {
                 ACCÈS TERMINAL
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="px-8 py-5 rounded-2xl bg-accent/5 border border-border text-foreground font-bold hover:bg-accent/10 transition-all flex items-center justify-center gap-3 backdrop-blur-md">
-                <Play className="w-5 h-5 text-primary" />
-                VUE D'ENSEMBLE
-              </button>
+              <a
+                href="/bluetrace-scanner.apk"
+                download
+                className="group px-6 py-3 rounded-2xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center justify-center gap-4 hover:scale-105 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+              >
+                <svg viewBox="0 0 512 512" className="w-8 h-8">
+                  <path fill="#28B2F6" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"/>
+                  <path fill="#02ED95" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/>
+                  <path fill="#FF3A44" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
+                  <path fill="#FFCE00" d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z"/>
+                </svg>
+                <div className="flex flex-col items-start leading-none text-white">
+                  <span className="text-[11px] text-gray-400 font-medium tracking-wide mb-1 uppercase">Télécharger sur</span>
+                  <span className="text-xl font-bold tracking-tight">Android (APK)</span>
+                </div>
+              </a>
             </div>
           </motion.div>
 
@@ -133,7 +161,7 @@ export default function Home() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="relative w-64 h-64 bg-background rounded-3xl border border-border shadow-2xl overflow-hidden flex items-center justify-center">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent"></div>
-                  <Image src="/logo.png" alt="BlueTrace Tech" width={160} height={160} className="object-contain drop-shadow-[0_0_50px_rgba(6,182,212,0.4)]" />
+                  <Image src="/logo-bluetrace.png" alt="BlueTrace Tech" width={160} height={160} className="object-contain drop-shadow-[0_0_50px_rgba(6,182,212,0.4)]" />
 
                   {/* Digital Overlay */}
                   <div className="absolute bottom-4 left-4 right-4 h-1 bg-accent/10 rounded-full overflow-hidden">
@@ -229,7 +257,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 opacity-50 relative">
-              <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+              <Image src="/logo-bluetrace.png" alt="Logo" fill className="object-contain" />
             </div>
             <span className="text-lg font-black text-foreground/50 uppercase">BlueTrace Tech</span>
           </div>

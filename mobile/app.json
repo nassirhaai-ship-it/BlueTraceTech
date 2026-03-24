@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "BlueTrace Tech",
+    "slug": "bluetrace-tech",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f8fafc",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#020617"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bluetracetech.scanner",
+      "infoPlist": {
+        "NSCameraUsageDescription": "BlueTrace Tech a besoin d'accéder à votre caméra pour scanner les QR Codes des certificats d'authenticité.",
+        "NSMicrophoneUsageDescription": "Accès requis pour la caméra.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.bluetracetech.scanner",
+      "permissions": [
+        "CAMERA",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#f8fafc",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "BlueTrace Tech a besoin d'accéder à votre caméra pour scanner les QR Codes."
+        }
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ff017497-3b8c-4301-8596-1d62b4d1c061"
+      }
+    }
+  }
+}
