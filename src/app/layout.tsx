@@ -99,8 +99,8 @@ function AppHeader() {
   return (
     <header className="fixed lg:sticky top-0 left-0 right-0 z-40 bg-sidebar border-b border-sidebar-border shadow-md lg:relative transition-colors duration-300">
       <div className="px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center h-16 justify-between">
-        <div className="flex items-center gap-4">
-          <img src="/logo-bluetrace.png" alt="BlueTrace Tech Logo" className="h-10 w-auto" />
+        <div className="flex items-center gap-4 pl-12 lg:pl-0">
+          <img src="/logo-bluetrace.png" alt="BlueTrace Tech Logo" className="h-8 sm:h-10 w-auto" />
         </div>
         <div className="flex items-center gap-2 sm:gap-4 justify-end ml-auto">
           <button className="relative p-2 rounded-full hover:bg-white/5 transition focus:outline-none focus:ring-2 focus:ring-cyan-400">

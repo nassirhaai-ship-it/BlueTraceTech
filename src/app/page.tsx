@@ -69,31 +69,31 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <div className="flex items-center gap-3 group cursor-pointer transition-transform duration-300 hover:scale-105">
             <Image src="/logo-bluetrace.png" alt="BlueTrace Tech" width={48} height={48} className="object-contain rounded-full" priority />
-            <span className="text-xl sm:text-2xl font-black tracking-tight uppercase">
+            <span className="hidden sm:inline-block text-xl sm:text-2xl font-black tracking-tight uppercase">
               <span className="text-blue-500">Blue</span><span className="text-foreground">Trace Tech</span>
             </span>
           </div>
 
 
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <a 
               href="/bluetrace-scanner.apk" 
               download
-              className="px-4 py-2 rounded-xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center gap-3 shadow-lg"
+              className="flex px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all items-center gap-2 sm:gap-3 shadow-lg"
             >
-              <svg viewBox="0 0 512 512" className="w-5 h-5">
+              <svg viewBox="0 0 512 512" className="w-4 h-4 sm:w-5 sm:h-5">
                 <path fill="#28B2F6" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"/>
                 <path fill="#02ED95" d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1z"/>
                 <path fill="#FF3A44" d="M104.6 499l280.8-161.2-60.1-60.1L104.6 499z"/>
                 <path fill="#FFCE00" d="M472.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8z"/>
               </svg>
-              <div className="flex flex-col items-start leading-none text-white">
-                <span className="text-[9px] text-gray-400 font-medium mb-1 uppercase">Télécharger l'</span>
-                <span className="text-sm font-bold tracking-tight">App Android</span>
+              <div className="flex flex-col items-start leading-tight text-white">
+                <span className="text-[8px] sm:text-[9px] text-gray-400 font-medium uppercase">Télécharger l'</span>
+                <span className="text-xs sm:text-sm font-bold tracking-tight">App Android</span>
               </div>
             </a>
-            <button onClick={() => router.push('/auth/signin')} className="px-6 py-2.5 rounded-full bg-foreground text-background font-bold hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all duration-300">
+            <button onClick={() => router.push('/auth/signin')} className="px-4 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-base rounded-full bg-foreground text-background font-bold hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all duration-300">
               DÉPLOYER
             </button>
           </div>
@@ -112,17 +112,17 @@ export default function Home() {
               <span className="w-2 h-2 rounded-full bg-primary animate-ping"></span>
               Quantum Aquaculture Monitoring
             </div>
-            <h1 className="text-6xl md:text-8xl font-black text-foreground leading-[0.9] mb-8 tracking-tighter">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground leading-[0.9] mb-8 tracking-tighter">
               L'AVENIR EST <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600">LIQUIDE.</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-lg leading-relaxed mb-10">
               Système de traçabilité biométrique et d'intelligence environnementale pour les fermes aquacoles de nouvelle génération.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 w-full">
               <button
                 onClick={() => router.push('/auth/signin')}
-                className="group relative px-8 py-5 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-lg overflow-hidden flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-cyan-500/20"
+                className="w-full sm:w-auto group relative px-8 py-5 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-black text-lg overflow-hidden flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl shadow-cyan-500/20"
               >
                 ACCÈS TERMINAL
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -130,7 +130,7 @@ export default function Home() {
               <a
                 href="/bluetrace-scanner.apk"
                 download
-                className="group px-6 py-3 rounded-2xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center justify-center gap-4 hover:scale-105 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
+                className="w-full sm:w-auto group px-6 py-3 rounded-2xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center justify-center gap-4 hover:scale-105 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
               >
                 <svg viewBox="0 0 512 512" className="w-8 h-8">
                   <path fill="#28B2F6" d="M47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0z"/>
@@ -240,7 +240,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="relative p-16 rounded-[40px] bg-gradient-to-br from-primary/20 to-blue-600/20 border border-border overflow-hidden shadow-3xl">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-dark.png')] opacity-20 dark:opacity-40"></div>
-            <h2 className="text-4xl md:text-6xl font-black text-foreground mb-8 relative z-10 leading-none">VOTRE FERME,<br />VERSION <span className="text-primary">AUGMENTÉE.</span></h2>
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-foreground mb-8 relative z-10 leading-tight">VOTRE FERME,<br />VERSION <span className="text-primary">AUGMENTÉE.</span></h2>
             <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto relative z-10">Rejoignez l'élite de l'aquaculture mondiale avec la solution BlueTrace Tech.</p>
             <button
               onClick={() => router.push('/auth/signin')}
