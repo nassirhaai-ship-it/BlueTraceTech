@@ -78,7 +78,7 @@ export default function Home() {
 
           <div className="flex items-center gap-2 sm:gap-4">
             <a 
-              href="/bluetrace-scanner.apk" 
+              href="/bluetraceTech.apk" 
               download
               className="flex px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all items-center gap-2 sm:gap-3 shadow-lg"
             >
@@ -128,7 +128,7 @@ export default function Home() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <a
-                href="/bluetrace-scanner.apk"
+                href="/bluetraceTech.apk"
                 download
                 className="w-full sm:w-auto group px-6 py-3 rounded-2xl bg-black border border-neutral-800 hover:bg-neutral-900 transition-all flex items-center justify-center gap-4 hover:scale-105 shadow-[0_0_40px_rgba(0,0,0,0.5)]"
               >
